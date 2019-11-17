@@ -285,6 +285,138 @@ k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 * Deployment handled from an `AppsodyApplication` operator and creates all resources, incl. routes
 * `Application` resource also is installed holding all meta information to the application
 
+=== step_04: Deployment with Pipeline
+
+Deploy the application into a OCP Cluster (current OCPv3.11) using Tekton Pipelines.
+
+Kabanero (Foundation) provides a set of predefined pipelines for the different stacks.
+For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant, which builds and deploy the project. Input is the Git repo and pipeline results in a running container.
+
+.Prerequisites
+* OCP Cluster
+* Kabanero Foundation installed, incl. Tekton
+
+.Steps
+* Create GitHub Personal Access Token
+** Enter GitHub > Profile *Settings* > *Developer Settings* > *Personal Access Tokens*. *Generate new token*
+*** Set name
+*** Set permission: `admin:repo_hook`
+*** Remember the token!
+* Configure Tekton to access GitHub
+** Call Tekton Dashboard `echo "http://$(oc get routes tekton-dashboard -n kabanero -o jsonpath='{.spec.host}')"`
+** Select *Secrets* and click *Add Secret*
+** Set fields:
+*** Name: github
+*** Namespace: kabanero
+*** Access To: Git server
+*** Username: your Git username
+*** Password/Token: The generated Git PAT
+*** Service Account: kabanero-operator
+*** Server URL: https://github.com
+* Configure Tekton Webhook for GitHub
+** Call Tekton Dashboard
+** Select *Webhooks*
+** Set fields
+*** Name: demo-express-webhook
+*** Repository URL: The URL to the Git repo, e.g. https://github.com/haf-tech/k101-nodejs-express.git
+*** Access Token: Press + and define a name and the Github PAT
+*** Namespace: kabanero
+*** Pipeline: select the pipeline, here `nodejs-express-build-deploy-pipeline`
+*** Service Account: kabanero-operator
+*** Docker Registry: e.g. the internal one with the namespace, `docker-registry.default.svc:5000/demo-express`
+*** Create.
+* Test Webhook Integration
+** Watch all PipelineRuns `oc get pipelinerun --all-namespaces --watch`
+** Make a small change and push it in the Git repo
+
+* Manual execution of the Tekton Pipeline
+
+
+
+
+.Verify Pipelines
+----
+$ oc get pipeline --all-namespaces
+NAMESPACE   NAME                                      AGE
+kabanero    java-microprofile-build-deploy-pipeline   1d
+kabanero    java-spring-boot2-build-deploy-pipeline   1d
+kabanero    nodejs-build-deploy-pipeline              1d
+kabanero    nodejs-express-build-deploy-pipeline      1d
+kabanero    nodejs-loopback-build-deploy-pipeline     1d
+kabanero    pipeline0                                 1d
+
+$ oc get pipeline nodejs-express-build-deploy-pipeline -n kabanero -o yaml
+
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  annotations:
+    manifestival: new
+...
+  name: nodejs-express-build-deploy-pipeline
+  namespace: kabanero
+...
+spec:
+  resources:
+  - name: git-source
+    type: git
+  - name: docker-image
+    type: image
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+      - name: git-source
+        resource: git-source
+      outputs:
+      - name: docker-image
+        resource: docker-image
+    taskRef:
+      name: nodejs-express-build-task
+  - name: deploy-task
+    resources:
+      inputs:
+      - name: git-source
+        resource: git-source
+      - name: docker-image
+        resource: docker-image
+    runAfter:
+    - build-task
+    taskRef:
+      name: nodejs-express-deploy-task
+----
+
+.Verify Tasks
+----
+$ oc get task --all-namespaces
+NAMESPACE   NAME                            AGE
+kabanero    java-microprofile-build-task    1d
+kabanero    java-microprofile-deploy-task   1d
+kabanero    java-spring-boot2-build-task    1d
+kabanero    java-spring-boot2-deploy-task   1d
+kabanero    monitor-result-task             1d
+kabanero    nodejs-build-task               1d
+kabanero    nodejs-deploy-task              1d
+kabanero    nodejs-express-build-task       1d
+kabanero    nodejs-express-deploy-task      1d
+kabanero    nodejs-loopback-build-task      1d
+kabanero    nodejs-loopback-deploy-task     1d
+kabanero    pipeline0-task                  1d
+
+$ oc get task nodejs-express-build-task -n kabanero -o yaml
+...
+
+$ oc get task nodejs-express-deploy-task -n kabanero -o yaml
+...
+----
+
+
+
+
+
+.Summary
+
+
 == License
 
 This article is licensed under the Apache License, Version 2.
