@@ -23,7 +23,7 @@ $ appsody list kabanero
 ----
 
 
-=== step_00
+=== step_00: Init
 
 Initial the project.
 
@@ -46,7 +46,7 @@ $ appsody run -v
 [Container] App started on PORT 3000
 ----
 
-=== step_01
+=== step_01: Code changes
 
 Change the code and see immediately the modification online.
 
@@ -111,7 +111,7 @@ $ docker logs -f $(docker ps | grep k101-nodejs-express | awk '{print $1}')
 * Undisturbed development without (manual) server restarts
 * Container support out of the box, without touching Dockerfile or Docker commands
 
-=== step_02
+=== step_02: Codewind integration
 
 Integrate in Codewind and test and debug the flow including monitoring and performance.
 
