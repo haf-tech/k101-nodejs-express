@@ -111,6 +111,42 @@ $ docker logs -f $(docker ps | grep k101-nodejs-express | awk '{print $1}')
 * Undisturbed development without (manual) server restarts
 * Container support out of the box, without touching Dockerfile or Docker commands
 
+=== step_02
+
+Integrate in Codewind and test and debug the flow including monitoring and performance.
+
+.Prerequisites
+* VSCode with Codewind plugin, use the marketplace and search for `Codewind`
+* Consider that the project must be located under `$HOME/codewind-workspace`
+
+.Steps
+* Add the existing project to Codewind. In Codewind view, select *Projects* > *Add Existing Project* and select the directory with our project
+* Open App: use the context menu in Codewind for the project, to open app in browser
+* Open Shell: to get a shell into the container
+* Show all logs: to get all logs from the container in the VSCode output view
+* Open Application Monitor: to open in the browser the monitor page
+* Open Performance Dashboard: to open the performance page
+* Create test case
+** Edit load run settings
+*** Path: `/echo/pf1`
+*** Save
+** Run Load Test
+*** set a name and execute the test. repeat this multiple times
+** Observe the Application Monitor
+* Restart the app in Debug Mode: Select in Codewind view `Restart in Debug Mode` (consider the status bar color of VSCode: orange for debug mode)
+** Set a break point in `app.js`
+** Open App: because after restarting is a new port exposed
+** Make a request `/echo/debug`
+** Go line by line in VSCode Debug perspective, observe and watch variables
+** Restart in Run Mode
+
+.Summary
+* Project provides out of the box multiple features like: Application Monitoring, Performance testing...all without explicitly configuration
+* IDE integration in VSCode is helpful and hides any Appsody commands
+* Debugging also out of the box supported
+
+HINT: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
+
 == License
 
 This article is licensed under the Apache License, Version 2.
