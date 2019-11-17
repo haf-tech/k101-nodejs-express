@@ -13,6 +13,36 @@ toc::[]
 
 For any step exists an own git tag.
 
+=== Prerequisites
+
+.Add Kabanero repo
+----
+$ appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/0.2.1/kabanero-index.yaml
+
+$ appsody list kabanero
+----
+
+
+=== step_00
+
+* Create the project using the `nodejs-express` stack from Kabanero Collection
+* Run the application
+* Call link:http://localhost:3000/[]
+* Stop the app/container with `STRG+C` in the terminal
+
+.Create project structure
+----
+$ mkdir k101-nodejs-express & cd k101-nodejs-express
+$ appsody init kabanero/nodejs-express
+----
+
+.Start the app
+----
+$ appsody run -v
+
+...
+[Container] App started on PORT 3000
+----
 
 
 == License
