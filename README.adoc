@@ -48,7 +48,7 @@ $ appsody run -v
 
 === step_01
 
-Change the code and see the immediately the modification online.
+Change the code and see immediately the modification online.
 
 * Start the app
 * modify the `app.js` and add a new endpoint
@@ -92,7 +92,7 @@ Verify the terminal with the Appsody log output to see the monitored file change
 
 ----
 
-See also that one docker container is running
+Verify also that the same docker container is still running
 
 .Check docker process
 ----
