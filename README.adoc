@@ -145,7 +145,7 @@ Integrate in Codewind and test and debug the flow including monitoring and perfo
 * IDE integration in VSCode is helpful and hides any Appsody commands
 * Debugging also out of the box supported
 
-HINT: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
+NOTE: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
 
 == License
 
