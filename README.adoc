@@ -147,6 +147,144 @@ Integrate in Codewind and test and debug the flow including monitoring and perfo
 
 NOTE: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
 
+=== step_03: Manual Deployment
+
+Deploy the application into a OCP Cluster (current OCPv3.11) using manual steps.
+
+.Prerequisites
+* OCPv3.11 cluster
+* `oc` cli installed on local machine
+* Kabanero (v0.2.0) Foundation installed, see link:https://kabanero.io/docs/ref/general/installing-kabanero-foundation.html[]. Consider to checkout the *0.2.0* branch!
+
+.Steps
+* Connect to the OCP cluster
+** Get the CLI command with token from the OCP Application console
+** `oc login https://master.com:443 --token=....`
+* Build a stable version 
+** Login to Container Registry
+*** If the Registry is insecure, you receive e.g. following error message `Error response from daemon: Get https://docker-registry-default.apps.bcaf.example.opentlc.com/v2/: x509: certificate signed by unknown authority`. Add the domain in the Docker config for insecure registries.
+*** Login to OCP registry: `docker login -u $(oc whoami) -p $(oc whoami -t) http://docker-registry-default.apps.bcaf.example.opentlc.com`
+** Tag the version: `appsody build -t k101-nodejs-express:v0.1`
+** OPTIONAL
+*** Tag the version: `appsody build -t docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1`
+*** Generate the manifest file (optional, created with build): `appsody deploy --generate-only -t k101-nodejs-express:v0.1`
+* Push the docker image
+** `docker push docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1`
+** The internal ImageStream use then `docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1`
+* Deployment
+** Create the project in OCP: `oc new-project demo-express`
+** Deploy into the cluster using the internal image: `appsody deploy -t docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1 --namespace demo-express`
+* Verification
+** Call the endpoint of the deployed app
+** Call kAppNav to see the deployed app
+
+
+.Build
+----
+$ docker login -u $(oc whoami) -p $(oc whoami -t) https://docker-registry-default....opentlc.com
+Login Succeeded
+
+$ appsody build -t docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1
+
+...
+Built docker image k101-nodejs-express:v0.1
+Running command: docker create --name k101-nodejs-express-extract kabanero/nodejs-express:0.2
+Running command: docker cp k101-nodejs-express-extract:/config/app-deploy.yaml /Users/haddouti/codewind-workspace/k101-nodejs-express/app-deploy.yaml
+Running command: docker rm k101-nodejs-express-extract -f
+Running git command: git version
+Running git command: git status -sb
+Unable to determine origin to compute repository URL
+Running git command: git log -n 1 --pretty=format:'{"author":"%an", "authoremail":"%ae", "sha":"%H", "date":"%cd", "committer":"%cn", "committeremail":"%ce", "message":"%s"}'
+Created deployment manifest: /Users/haddouti/codewind-workspace/k101-nodejs-express/app-deploy.yaml
+
+$ cat app-deploy.yaml
+
+...
+spec:
+  applicationImage: docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1
+  createKnativeService: false
+  expose: true
+  livenessProbe:
+    failureThreshold: 12
+    httpGet:
+      path: /live
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 2
+...
+
+
+$ docker push docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1
+
+v0.1: digest: sha256:a299cc21e7e18eebb100556377dff7f25a5283008c34f66add89229c6a08be75 size: 3886
+
+$ oc get is -n demo-express
+
+NAME                  DOCKER REPO                                                         TAGS   UPDATED
+k101-nodejs-express   docker-registry.default.svc:5000/demo-express/k101-nodejs-express   v0.1   5 minutes ago
+----
+
+.Deploy
+----
+$ oc new-project demo-express
+
+Now using project "demo-express" on server "https://master.com:443".
+
+$ appsody deploy -t docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1 --namespace demo-express
+
+
+Extracting project from development environment
+Pulling docker image kabanero/nodejs-express:0.2
+Running command: docker pull kabanero/nodejs-express:0.2
+0.2: Pulling from kabanero/nodejs-express
+Digest: sha256:ae05d5a746aa0f043ce589fa73fe8139dc5d829787a8433f9fa01ccd83b9fadb
+Status: Image is up to date for kabanero/nodejs-express:0.2
+docker.io/kabanero/nodejs-express:0.2
+[Warning] The stack image does not contain APPSODY_PROJECT_DIR. Using /project
+...
+
+Running command: kubectl get route k101-nodejs-express -o jsonpath={.status.ingress[0].host} --namespace demo-express
+Deployed project running at k101-nodejs-express-demo-express.apps.bcaf.example.opentlc.com
+
+$ oc get route -n demo-express
+NAME                  HOST/PORT                                                        PATH   SERVICES              PORT       TERMINATION   WILDCARD
+k101-nodejs-express   k101-nodejs-express-demo-express.apps.bcaf.example.opentlc.com          k101-nodejs-express   3000-tcp                 None
+
+$ curl "http://$(oc get route k101-nodejs-express -n demo-express -o jsonpath='{.spec.host}')/echo/mega"
+
+Echo: mega; delay=2681
+----
+
+
+.Deployment verification
+----
+$ curl "http://$(oc get route k101-nodejs-express -n demo-express -o jsonpath='{.spec.host}')/echo/mega"
+
+Echo: mega; delay=2681
+
+$ echo "https://$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}')/kappnav-ui"
+https://kappnav-ui-service-kappnav.apps.bcaf.example.opentlc.com/kappnav-ui/
+
+$ oc get application
+NAME                  AGE
+k101-nodejs-express   51m
+
+$ oc get application k101-nodejs-express -o yaml
+
+$ oc describe application k101-nodejs-express
+
+$ c get pods
+NAME                                  READY   STATUS    RESTARTS   AGE
+appsody-operator-5b4bbc8c44-7gxt6     1/1     Running   0          52m
+k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
+----
+
+
+.Summary
+* For deployment we enter the Appsody world (again), will be optimized in near future
+* Deployment handled from an `AppsodyApplication` operator and creates all resources, incl. routes
+* `Application` resource also is installed holding all meta information to the application
+
 == License
 
 This article is licensed under the Apache License, Version 2.
