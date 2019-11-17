@@ -25,6 +25,8 @@ $ appsody list kabanero
 
 === step_00
 
+Initial the project.
+
 * Create the project using the `nodejs-express` stack from Kabanero Collection
 * Run the application
 * Call link:http://localhost:3000/[]
@@ -44,6 +46,70 @@ $ appsody run -v
 [Container] App started on PORT 3000
 ----
 
+=== step_01
+
+Change the code and see the immediately the modification online.
+
+* Start the app
+* modify the `app.js` and add a new endpoint
+* Call the new endpoint link:http://localhost:3000/echo/test-user[]
+* Stop the app/container with `STRG+C` in the terminal
+
+.Start the app
+----
+$ appsody run -v
+
+...
+[Container] App started on PORT 3000
+----
+
+.Add new endpoint with random delay in processing
+[source,javascript]
+----
+const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
+
+app.get('/echo/:val', (req, res) => {
+  let val = req.params.val;
+
+  let delay = Math.floor(1000 * (Math.random() * 5)); 
+  sleep(delay).then(() => {
+    res.send("Echo: " + val + "; delay=" + delay);
+  })
+  
+});
+----
+
+Verify the terminal with the Appsody log output to see the monitored file change. Appsody restarts the node process with the latest change.
+
+.Appsody log output
+----
+[Container] [ControllerDebug] File watch event detected for:  FILE "app.js" WRITE [/project/user-app/app.js]
+...
+[Container] [ControllerDebug] New process created with pid 57
+[Container]
+[Container] > nodejs-express@0.2.8 start /project
+[Container] > node server.js
+
+----
+
+See also that one docker container is running
+
+.Check docker process
+----
+$ docker ps | grep k101-nodejs-express
+
+ab14a8692277        kabanero/nodejs-express:0.2   "/.appsody/appsody-c…"   7 minutes ago       Up 7 minutes        0.0.0.0:3000->3000/tcp, 0.0.0.0:8080->8080/tcp, 0.0.0.0:9229->9229/tcp   k101-nodejs-express-dev
+----
+
+.Check the log from the docker process (similar to the log output from Appsody terminal)
+----
+$ docker logs -f $(docker ps | grep k101-nodejs-express | awk '{print $1}')
+----
+
+.Summary
+* Fast ramp-up. New nodejs-express created without taking care about project initialization, structure, dependencies
+* Undisturbed development without (manual) server restarts
+* Container support out of the box, without touching Dockerfile or Docker commands
 
 == License
 
