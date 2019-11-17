@@ -325,11 +325,15 @@ For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant,
 *** Service Account: kabanero-operator
 *** Docker Registry: e.g. the internal one with the namespace, `docker-registry.default.svc:5000/demo-express`
 *** Create.
-* Test Webhook Integration
+*** This will trigger a WebHook creation in GitHub. (*tbd*)
+* Test Webhook Integration: manual trigger
+** Create the PipelineResources for git repo and docker image
+** Create a PipelineRun using the Pipeline `nodejs-express-build-deploy-pipeline` with the new created resources
+** Watch the pipeline and task runs: `oc get pipelinerun --all-namespaces --watch` and `oc get taskrun --all-namespaces --watch`
+** A script exists with all necessary steps: `manual-tekton-pipelinerun.sh`
+* Test Webhook Integration: automatic trigger
 ** Watch all PipelineRuns `oc get pipelinerun --all-namespaces --watch`
 ** Make a small change and push it in the Git repo
-
-* Manual execution of the Tekton Pipeline
 
 
 
@@ -410,6 +414,98 @@ $ oc get task nodejs-express-deploy-task -n kabanero -o yaml
 ...
 ----
 
+
+
+.Manual pipeline trigger (see also: ./manual-tekton-pipelinerun.sh)
+----
+$ namespace=kabanero
+$ APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
+$ REPO_BRANCH=master
+$ DOCKER_IMAGE="docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1"
+
+$ cat <<EOF | oc -n ${namespace} apply -f -
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: docker-image
+  spec:
+    params:
+    - name: url
+      value: ${DOCKER_IMAGE}
+    type: image
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: git-source
+  spec:
+    params:
+    - name: revision
+      value: ${REPO_BRANCH}
+    - name: url
+      value: ${APP_REPO}
+    type: git
+kind: List
+EOF
+
+$ oc get pipelineresource -n kabanero
+NAME           AGE
+docker-image   14s
+git-source     14s
+
+
+$ cat <<EOF | oc -n ${namespace} apply -f -
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: nodejs-express-build-deploy-pipeline-run
+  namespace: kabanero
+spec:
+  pipelineRef:
+    name: nodejs-express-build-deploy-pipeline
+  resources:
+  - name: git-source
+    resourceRef:
+      name: git-source
+  - name: docker-image
+    resourceRef:
+      name: docker-image
+  serviceAccount: kabanero-operator
+  timeout: 60m
+EOF
+----
+
+
+Applications are deployed in the namespace where Kabanero CR is installed. To deploy application to different namespace is a configuration of the target namespace(s) necessary.
+For this reason add `spec.targetNamespaces` with a list of relevant namespaces.
+
+.Example for Kabanero CR with additional target namespaces (reduced to the essential)
+----
+$ oc get kabanero kabanero -n kabanero -o yaml
+
+apiVersion: v1
+items:
+- apiVersion: kabanero.io/v1alpha1
+  kind: Kabanero
+  metadata:
+    name: kabanero
+    namespace: kabanero
+  spec:
+    appsodyOperator: {}
+    collections:
+      repositories:
+      - activateDefaultCollections: true
+        name: central
+        url: https://github.com/kabanero-io/collections/releases/download/0.2.0/kabanero-index.yaml
+    github: {}
+    landing: {}
+    targetNamespaces:
+    - demo-express
+    tekton: {}
+    version: 0.2.0
+kind: List
+----
 
 
 
