@@ -507,7 +507,8 @@ items:
 kind: List
 ----
 
-
+Additionally is it necessary to add the target namespace in `app-deploy.yaml`
+*tbd*
 
 
 .Summary
