@@ -8,7 +8,7 @@ Kabanero 101 - nodejs-express example used for workshops
 toc::[]
 
 == Overview
- 
+  
 == Steps
 
 For any step exists an own git tag.
