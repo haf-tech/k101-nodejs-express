@@ -535,7 +535,7 @@ appsody deploy --generate-only -t image-registry.openshift-image-registry.svc:50
 ----
 
 $ cat pipelinerun_add.sh
-
+#!/bin/sh
 namespace=kabanero
 APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
 REPO_BRANCH=master
@@ -626,7 +626,9 @@ Additionally is it necessary to add the target namespace in `app-deploy.yaml`
 
 .Summary
 
-*tbd*
+* Deployment into Kubernetes/OCP Cluster works 
+* Deployment approach independent from the used technology stack of the app
+* Do not care which tools or how a build or deployment works
 
 == License
 
