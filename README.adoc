@@ -39,15 +39,70 @@ td=$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}') && 
 
 Initial the project.
 
+* Intro in Appsody
 * Create the project using the `nodejs-express` stack from Kabanero Collection
 * Run the application
 * Call link:http://localhost:3000/[]
 * Stop the app/container with `STRG+C` in the terminal
 
+.Appsody overview
+----
+
+$ appsody repo list
+
+NAME      	URL
+*incubator	https://github.com/appsody/stacks/releases/latest/download/incubator-index.yaml
+appsodyex 	https://github.com/appsody/stacks/releases/latest/download/experimental-index.yaml
+kabanero  	https://github.com/kabanero-io/collections/releases/download/0.2.1/kabanero-index.yaml
+
+$ appsody list
+
+REPO      	ID                       	VERSION  	TEMPLATES        	DESCRIPTION
+appsodyex 	java-spring-boot2-liberty	0.1.10   	*default         	Spring Boot on Open Liberty & OpenJ9 using Maven
+appsodyex 	nodejs-functions         	0.1.5    	*simple          	Serverless runtime for Node.js functions
+appsodyex 	quarkus                  	0.2.1    	*default         	Quarkus runtime for running Java applications
+appsodyex 	rocket                   	0.1.0    	*simple          	Rocket web framework for Rust
+appsodyex 	rust                     	0.1.4    	*simple          	Runtime for Rust applications
+appsodyex 	vertx                    	0.1.4    	*default         	Eclipse Vert.x runtime for running Java applications
+*incubator	java-microprofile        	0.2.19   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+*incubator	java-spring-boot2        	0.3.17   	*default, kotlin 	Spring Boot using OpenJ9 and Maven
+*incubator	kitura                   	0.2.2    	*default         	Runtime for Kitura applications
+*incubator	nodejs                   	0.2.5    	*simple          	Runtime for Node.js applications
+*incubator	nodejs-express           	0.2.9    	scaffold, *simple	Express web framework for Node.js
+*incubator	nodejs-loopback          	0.1.7    	*scaffold        	LoopBack 4 API Framework for Node.js
+*incubator	python-flask             	0.1.6    	*simple          	Flask web Framework for Python
+*incubator	starter                  	0.1.1    	*simple          	Runnable starter stack, copy to create a new stack
+*incubator	swift                    	0.2.3    	*simple          	Appsody runtime for Swift applications
+kabanero  	java-microprofile        	0.2.18   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+kabanero  	java-spring-boot2        	0.3.15   	*default, kotlin 	Spring Boot using OpenJ9 and Maven
+kabanero  	nodejs                   	0.2.5    	*simple          	Runtime for Node.js applications
+kabanero  	nodejs-express           	0.2.7    	scaffold, *simple	Express web framework for Node.js
+kabanero  	nodejs-loopback          	0.1.5    	*scaffold        	LoopBack 4 API Framework for Node.js
+----
+
+Appsody Stacks, e.g. link:https://github.com/appsody/stacks/tree/master/incubator/nodejs-express[nodejs-express].
+
+
 .Create project structure
 ----
 $ mkdir k101-nodejs-express & cd k101-nodejs-express
 $ appsody init kabanero/nodejs-express
+
+$ tree -a
+
+.
+├── .appsody-config.yaml
+├── .gitignore
+├── .vscode
+│   ├── launch.json
+│   └── tasks.json
+├── app.js
+├── package-lock.json
+├── package.json
+└── test
+    └── test.js
+
+2 directories, 8 files
 ----
 
 .Start the app

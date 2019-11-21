@@ -4,6 +4,7 @@ app.get('/', (req, res) => {
   res.send("Hello from Appsody!");
 });
  
+/*
 const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
 
 app.get('/echo/:val', (req, res) => {
@@ -15,5 +16,5 @@ app.get('/echo/:val', (req, res) => {
   })
   
 });
-
+*/
 module.exports.app = app;
