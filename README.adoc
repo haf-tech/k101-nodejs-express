@@ -80,7 +80,7 @@ kabanero  	nodejs-express           	0.2.7    	scaffold, *simple	Express web fra
 kabanero  	nodejs-loopback          	0.1.5    	*scaffold        	LoopBack 4 API Framework for Node.js
 ----
 
-Appsody Stacks, e.g. link:https://github.com/appsody/stacks/tree/master/incubator/nodejs-express[nodejs-express].
+Appsody Stacks, e.g. link:https://github.com/appsody/stacks/tree/master/incubator/nodejs-express[nodejs-express] compared to same stack option from Kabanero Collection: link:https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express[nodejs-express].
 
 
 .Create project structure
