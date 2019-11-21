@@ -51,6 +51,7 @@ metadata:
     image.opencontainers.org/title: k101-nodejs-express
     stack.appsody.dev/version: 0.2.8
   name: k101-nodejs-express
+  namespace: demo-express
 spec:
   applicationImage: docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1
   createKnativeService: false

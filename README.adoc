@@ -15,6 +15,8 @@ For any step exists an own git tag.
 
 === Prerequisites
 
+* OCPv4 with Kabanero 0.3.0
+
 .Add Kabanero repo
 ----
 $ appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/0.2.1/kabanero-index.yaml
@@ -22,6 +24,16 @@ $ appsody repo add kabanero https://github.com/kabanero-io/collections/releases/
 $ appsody list kabanero
 ----
 
+.Helpful links
+----
+
+# Tekton dashboard
+td=$(oc get routes tekton-dashboard -n tekton-pipelines -o jsonpath='{.spec.host}') && echo "http://$td:80"
+
+# kAppNav UI
+td=$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}') && echo "https://$td/kappnav-ui/"
+
+----
 
 === step_00: Init
 
@@ -292,9 +304,12 @@ Deploy the application into a OCP Cluster (current OCPv3.11) using Tekton Pipeli
 Kabanero (Foundation) provides a set of predefined pipelines for the different stacks.
 For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant, which builds and deploy the project. Input is the Git repo and pipeline results in a running container.
 
+Kabanero deploys in the same namespace where Kabanero CR is deployed, usually `kabanero`. To support other target namespaces enhance the Kabanero CR and add in the `app-deploy.yaml` the target namespace.
+
 .Prerequisites
 * OCP Cluster
 * Kabanero Foundation installed, incl. Tekton
+
 
 .Steps
 * Create GitHub Personal Access Token
@@ -302,6 +317,9 @@ For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant,
 *** Set name
 *** Set permission: `admin:repo_hook`
 *** Remember the token!
+* Configure Kabanero to support further namespaces
+** Enhance Kabanero CR with the list of target namespaces
+** Adjust the Appsody deployment manifest file holding the target namespace
 * Configure Tekton to access GitHub
 ** Call Tekton Dashboard `echo "http://$(oc get routes tekton-dashboard -n kabanero -o jsonpath='{.spec.host}')"`
 ** Select *Secrets* and click *Add Secret*
@@ -323,9 +341,10 @@ For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant,
 *** Namespace: kabanero
 *** Pipeline: select the pipeline, here `nodejs-express-build-deploy-pipeline`
 *** Service Account: kabanero-operator
-*** Docker Registry: e.g. the internal one with the namespace, `docker-registry.default.svc:5000/demo-express`
+*** Docker Registry: e.g. the internal one with the namespace, `image-registry.openshift-image-registry.svc:5000/demo-express`
 *** Create.
 *** This will trigger a WebHook creation in GitHub. (*tbd*)
+* Create the project/namespace if not done `demo-express`, before pushing the first image to the project.
 * Test Webhook Integration: manual trigger
 ** Create the PipelineResources for git repo and docker image
 ** Create a PipelineRun using the Pipeline `nodejs-express-build-deploy-pipeline` with the new created resources
@@ -414,16 +433,60 @@ $ oc get task nodejs-express-deploy-task -n kabanero -o yaml
 ...
 ----
 
+.Create the project and set permissions for image pulling
+----
+$ oc new-project demo-express
 
+$ oc policy add-role-to-user system:image-puller system:serviceaccount:kabanero:k101-nodejs-express --namespace=demo-express
+----
+
+
+Applications are deployed in the namespace where Kabanero CR is installed. To deploy application to different namespace is a configuration of the target namespace(s) necessary.
+For this reason add `spec.targetNamespaces` with a list of relevant namespaces.
+
+.Example for Kabanero CR with additional target namespaces (reduced to the essential)
+----
+$ oc get kabanero kabanero -n kabanero -o yaml
+
+apiVersion: v1
+items:
+- apiVersion: kabanero.io/v1alpha1
+  kind: Kabanero
+  metadata:
+    name: kabanero
+    namespace: kabanero
+  spec:
+    appsodyOperator: {}
+    collections:
+      repositories:
+      - activateDefaultCollections: true
+        name: central
+        url: https://github.com/kabanero-io/collections/releases/download/0.3.0/kabanero-index.yaml
+    github: {}
+    landing: {}
+    targetNamespaces:
+    - demo-express
+    tekton: {}
+    version: 0.2.0
+kind: List
+----
+
+Create a `app-deploy.yaml` containing the target namespaces and the correct image URL (nevertheless the image URL will be replaced during pipeline deployment)
+----
+appsody deploy --generate-only -t image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1 -n demo-express
+----
 
 .Manual pipeline trigger (see also: ./manual-tekton-pipelinerun.sh)
 ----
-$ namespace=kabanero
-$ APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
-$ REPO_BRANCH=master
-$ DOCKER_IMAGE="docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1"
 
-$ cat <<EOF | oc -n ${namespace} apply -f -
+$ cat pipelinerun_add.sh
+
+namespace=kabanero
+APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
+REPO_BRANCH=master
+DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1"
+
+cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: v1
 items:
 - apiVersion: tekton.dev/v1alpha1
@@ -449,21 +512,31 @@ items:
 kind: List
 EOF
 
+
 $ oc get pipelineresource -n kabanero
 NAME           AGE
 docker-image   14s
 git-source     14s
 
+$ cat pipelinerun_exec.sh
 
-$ cat <<EOF | oc -n ${namespace} apply -f -
+#!/bin/sh
+
+namespace=kabanero
+APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
+REPO_BRANCH=master
+DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1"
+
+
+cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
-  name: nodejs-express-build-deploy-pipeline-run
+  name: nodejs-express-build-deploy-pipeline-run-1
   namespace: kabanero
 spec:
   pipelineRef:
-    name: nodejs-express-build-deploy-pipeline
+    name: nodejs-express-build-push-deploy-pipeline
   resources:
   - name: git-source
     resourceRef:
@@ -474,38 +547,23 @@ spec:
   serviceAccount: kabanero-operator
   timeout: 60m
 EOF
+
 ----
 
 
-Applications are deployed in the namespace where Kabanero CR is installed. To deploy application to different namespace is a configuration of the target namespace(s) necessary.
-For this reason add `spec.targetNamespaces` with a list of relevant namespaces.
 
-.Example for Kabanero CR with additional target namespaces (reduced to the essential)
-----
-$ oc get kabanero kabanero -n kabanero -o yaml
 
-apiVersion: v1
-items:
-- apiVersion: kabanero.io/v1alpha1
-  kind: Kabanero
-  metadata:
-    name: kabanero
-    namespace: kabanero
-  spec:
-    appsodyOperator: {}
-    collections:
-      repositories:
-      - activateDefaultCollections: true
-        name: central
-        url: https://github.com/kabanero-io/collections/releases/download/0.2.0/kabanero-index.yaml
-    github: {}
-    landing: {}
-    targetNamespaces:
-    - demo-express
-    tekton: {}
-    version: 0.2.0
-kind: List
-----
+Verify the log of the PipelineRun, find the Pod in `-n kabanero` representing the current PipelineRun and display the logs for one of the sub steps. Each step is own container.
+---
+step-create-dir-docker-image-l4z85 
+step-git-source-git-source-2trnz 
+step-assemble-extract 
+step-validate-collection-is-active 
+step-build step-push step-image-digest-exporter-4lgzc
+
+$ oc logs -f nodejs-express-build-deploy-pipeline-run-1-build-push-tas-nk4f4-pod-1d33c3 -c step-build
+---
+
 
 Additionally is it necessary to add the target namespace in `app-deploy.yaml`
 *tbd*
