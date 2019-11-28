@@ -15,11 +15,11 @@ For any step exists an own git tag.
 
 === Prerequisites
 
-* OCPv4 with Kabanero 0.3.0
+* OCPv4 with Kabanero 0.3.1
 
 .Add Kabanero repo
 ----
-$ appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/0.3.0/kabanero-index.yaml
+$ appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/0.3.1/kabanero-index.yaml
 
 $ appsody list kabanero
 ----
@@ -522,7 +522,7 @@ items:
     targetNamespaces:
     - demo-express
     tekton: {}
-    version: 0.3.0
+    version: 0.3.1
 kind: List
 ----
 

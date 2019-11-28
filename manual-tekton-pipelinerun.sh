@@ -52,3 +52,5 @@ spec:
   serviceAccount: kabanero-operator
   timeout: 60m
 EOF
+
+oc get pipelinerun -n kabanero

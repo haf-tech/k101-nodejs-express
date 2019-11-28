@@ -7,14 +7,14 @@ metadata:
     build-date: 2019-10-29T20:35:20.404230
     commit.image.appsody.dev/author: Hafid Haddouti <Hafid.Haddouti@ibm.com>
     commit.image.appsody.dev/committer: Hafid Haddouti <Hafid.Haddouti@ibm.com>
-    commit.image.appsody.dev/date: Sun Nov 17 11:25:57 2019 +0100
-    commit.image.appsody.dev/message: Update docu
+    commit.image.appsody.dev/date: Sat Nov 23 21:20:15 2019 +0100
+    commit.image.appsody.dev/message: Update name of PipelineRun
     description: This image contains the Kabanero development stack for the Nodejs
       Express collection
     distribution-scope: public
     help: For more information visit https://github.com/sclorg/s2i-nodejs-container
-    image.opencontainers.org/created: "2019-11-17T12:25:20+01:00"
-    image.opencontainers.org/revision: bdced2da18fab09a5fbd0b0ea10e5af50582d0d8-modified
+    image.opencontainers.org/created: "2019-11-24T21:40:10+01:00"
+    image.opencontainers.org/revision: 8fc99e3b68bb0c39d2860d7d97b75b641f442ed9-modified
     k8s.io/description: Node.js 10 available as container is a base platform for building
       and running various Node.js 10 applications and frameworks. Node.js is a platform
       built on Chrome's JavaScript runtime for easily building fast, scalable network
@@ -36,8 +36,8 @@ metadata:
     s2i.io/scripts-url: image:///usr/libexec/s2i
     s2i.openshift.io/scripts-url: image:///usr/libexec/s2i
     stack.appsody.dev/configured: kabanero/nodejs-express:0.2
-    stack.appsody.dev/created: 2019-11-14T18:07:04+0000
-    stack.appsody.dev/revision: 7ffbe8b2bec6fb283d926704dc2c6c4c29fcca2b
+    stack.appsody.dev/created: 2019-11-19T17:41:27+0000
+    stack.appsody.dev/revision: 82c11bd3fda141fc56df6653a58a3567dfe87d46
     stack.appsody.dev/tag: kabanero/nodejs-express:0.2.8
     summary: Image for Kabanero Node.js Express development
     url: https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/nodejs-10/images/1-54
@@ -51,9 +51,9 @@ metadata:
     image.opencontainers.org/title: k101-nodejs-express
     stack.appsody.dev/version: 0.2.8
   name: k101-nodejs-express
-  namespace: demo-express
+  namespace: demo-express2
 spec:
-  applicationImage: docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1
+  applicationImage: demo-express2/k101-nodejs-express:v0.1
   createKnativeService: false
   expose: true
   livenessProbe:
