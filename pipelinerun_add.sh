@@ -2,7 +2,7 @@
 namespace=kabanero
 APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
 REPO_BRANCH=master
-DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1"
+DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/${PRJ_NAME}/k101-nodejs-express:v0.1"
 
 cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: v1
@@ -10,7 +10,7 @@ items:
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
-    name: docker-image
+    name: ${PRJ_NAME}-docker-image
   spec:
     params:
     - name: url
@@ -19,7 +19,7 @@ items:
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
-    name: git-source
+    name: ${PRJ_NAME}-git-source
   spec:
     params:
     - name: revision

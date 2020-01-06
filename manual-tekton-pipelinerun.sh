@@ -3,7 +3,7 @@
 namespace=kabanero
 APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
 REPO_BRANCH=master
-DOCKER_IMAGE="docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1"
+DOCKER_IMAGE="docker-registry.default.svc:5000/${PRJ_NAME}/k101-nodejs-express:v0.1"
 
 cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: v1
@@ -11,7 +11,7 @@ items:
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
-    name: docker-image
+    name: ${PRJ_NAME}-docker-image
   spec:
     params:
     - name: url
@@ -20,7 +20,7 @@ items:
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
-    name: git-source
+    name: ${PRJ_NAME}-git-source
   spec:
     params:
     - name: revision
@@ -31,24 +31,24 @@ items:
 kind: List
 EOF
 
-oc get pipelineresource -n kabanero
+oc get pipelineresource -n ${namespace}
 
 cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
-  name: nodejs-express-build-deploy-pipeline-run
-  namespace: kabanero
+  name: nodejs-express-build-push-deploy-pipeline-run
+  namespace: ${namespace}
 spec:
   pipelineRef:
-    name: nodejs-express-build-deploy-pipeline
+    name: nodejs-express-build-push-deploy-pipeline
   resources:
   - name: git-source
     resourceRef:
-      name: git-source
+      name: ${PRJ_NAME}-git-source
   - name: docker-image
     resourceRef:
-      name: docker-image
+      name: ${PRJ_NAME}-docker-image
   serviceAccount: kabanero-operator
   timeout: 60m
 EOF

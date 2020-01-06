@@ -258,9 +258,10 @@ $ docker logs -f $(docker ps | grep kabanero | awk '{print $1}')
 
 '''
 
-=== step_02: Codewind integration
+=== step_02: Codewind integration (Optional)
 
 Integrate in Codewind and test and debug the flow including monitoring and performance.
+This step is optional. 
 
 .Prerequisites
 * VSCode with Codewind plugin, use the marketplace and search for `Codewind`
@@ -369,7 +370,10 @@ Running command: docker create --name test3-extract docker.io/kabanero/nodejs-ex
 Running command: docker cp test3-extract:/config/app-deploy.yaml /Users/haddouti/codewind-workspace/test3/app-deploy.yaml
 Running command: docker rm test3-extract -f
 Created deployment manifest: /Users/haddouti/codewind-workspace/test3/app-deploy.yaml
+----
 
+.Check the Manifest file containing info about image, k8s probes etc
+----
 $ cat app-deploy.yaml
 
 ...
@@ -385,6 +389,10 @@ spec:
     initialDelaySeconds: 5
     periodSeconds: 2
 ...
+----
+
+.The Build with push results also in an ImageStream in OCP Cluster
+----
 
 $ oc get is -n ${PRJ_NAME}
 NAME                  IMAGE REPOSITORY                                                              TAGS   UPDATED
@@ -411,7 +419,10 @@ docker.io/kabanero/nodejs-express:0.2
 
 Running command: kubectl get route k101-nodejs-express -o jsonpath={.status.ingress[0].host} --namespace demo-express
 Deployed project running at k101-nodejs-express-demo-express.apps.bcaf.example.opentlc.com
+----
 
+.Get the automatically generated route
+----
 $ oc get route -n ${PRJ_NAME}
 NAME                  HOST/PORT                                                        PATH   SERVICES              PORT       TERMINATION   WILDCARD
 k101-nodejs-express   k101-nodejs-express-demo-express.apps.bcaf.example.opentlc.com          k101-nodejs-express   3000-tcp                 None
@@ -458,19 +469,261 @@ k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 
 === step_04: Deployment with Pipeline
 
-Deploy the application into a OCP Cluster (current OCPv3.11) using Tekton Pipelines.
+Deploy manually an application into a OCP Cluster (current OCPv4.2) using Tekton Pipelines.
 
 Kabanero (Foundation) provides a set of predefined pipelines for the different stacks.
-For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant, which builds and deploy the project. Input is the Git repo and pipeline results in a running container.
+For our project is the pipeline `nodejs-express-build-deploy-pipeline` relevant, which builds and deploy the project from an existing Git repo. 
 
-Kabanero deploys in the same namespace where Kabanero CR is deployed, usually `kabanero`. To support other target namespaces enhance the Kabanero CR and add in the `app-deploy.yaml` the target namespace.
+Kabanero deploys in the same namespace where Kabanero CR is deployed, usually `kabanero`. To support other target namespaces is the Kabanero CR enhanced, also the manifest file `app-deploy.yaml` contains the target namespace.
+
+For simplicity the following is given:
+
+* Public repository with Kabanero application (this one here)
+* Target Namespace is `demo-express`
+* No GitHub Secret is needed
+* Kabanero is configured to support multiple target namespaces
 
 .Prerequisites
 * OCP Cluster
 * Kabanero Foundation installed, incl. Tekton
+* Public Git repo with Kabanero application
+
+TIP: Consider to replace the Git Repo URL in the Pipeline definition if you will use your own repository. Otherwise imagine you have already pushed your new application and code change to the given Git repo and you will deploy the latest version with Kabanero Pipeline.
+
+[NOTE]
+====
+.Overview
+* Test Webhook Integration: manual trigger
+** Create the PipelineResources for git repo and docker image
+** Create a PipelineRun using the Pipeline `nodejs-express-build-deploy-pipeline` with the new created resources
+** Watch the pipeline and task runs: `oc get pipelinerun --all-namespaces --watch` and `oc get taskrun --all-namespaces --watch`
+** A script exists with all necessary steps: `manual-tekton-pipelinerun.sh`
+** Verify the pipeline execution and resulting app
+====
+
+.Verify the existing Pipelines
+----
+$ oc get pipeline --all-namespaces
+NAMESPACE   NAME                                      AGE
+kabanero    java-microprofile-build-deploy-pipeline   1d
+kabanero    java-spring-boot2-build-deploy-pipeline   1d
+kabanero    nodejs-build-deploy-pipeline              1d
+kabanero    nodejs-express-build-deploy-pipeline      1d
+kabanero    nodejs-loopback-build-deploy-pipeline     1d
+...
+kabanero    pipeline0                                 1d
+----
+
+.Check the details of the nodejs-express pipeline
+----
+$ oc get pipeline nodejs-express-build-push-deploy-pipeline -n kabanero -o yaml
+
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  annotations:
+    manifestival: new
+...
+  name: nodejs-express-build-push-deploy-pipeline
+  namespace: kabanero
+...
+spec:
+  resources:
+  - name: git-source
+    type: git
+  - name: docker-image
+    type: image
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+      - name: git-source
+        resource: git-source
+      outputs:
+      - name: docker-image
+        resource: docker-image
+    taskRef:
+      name: nodejs-express-build-task
+  - name: deploy-task
+    resources:
+      inputs:
+      - name: git-source
+        resource: git-source
+      - name: docker-image
+        resource: docker-image
+    runAfter:
+    - build-task
+    taskRef:
+      name: nodejs-express-deploy-task
+----
+
+.Verify the existing Pipeline Tasks
+----
+$ oc get task --all-namespaces
+NAMESPACE   NAME                            AGE
+kabanero    java-microprofile-build-task    1d
+kabanero    java-microprofile-deploy-task   1d
+kabanero    java-spring-boot2-build-task    1d
+kabanero    java-spring-boot2-deploy-task   1d
+kabanero    monitor-result-task             1d
+kabanero    nodejs-build-task               1d
+kabanero    nodejs-deploy-task              1d
+kabanero    nodejs-express-build-task       1d
+kabanero    nodejs-express-deploy-task      1d
+kabanero    nodejs-loopback-build-task      1d
+kabanero    nodejs-loopback-deploy-task     1d
+...
+kabanero    pipeline0-task                  1d
+----
+
+.Check details of the nodejs-express relevant tasks
+----
+$ oc get task nodejs-express-build-task -n kabanero -o yaml
+...
+
+$ oc get task nodejs-express-deploy-task -n kabanero -o yaml
+...
+----
 
 
-.Steps
+You can also use the Tekton Dashboard to verify the Pipeline and Task definitions
+
+* Tekton Dashboard
+** Select `Pipelines`, the Info-Button provides the definition
+** Select `Tasks`, Info-Button
+
+
+To execute a Pipeline create two PipelineResource objects, one holding the Git Repo and the other the resulting Docker Image URL.
+To avoid any conflicts with other participants contains both resource the project name as prefix.
+
+.Manual pipeline trigger (see also: ./manual-tekton-pipelinerun.sh)
+----
+
+$ cat pipelinerun_add.sh
+#!/bin/sh
+namespace=kabanero
+APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
+REPO_BRANCH=master
+DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/${PRJ_NAME}/k101-nodejs-express:v0.1"
+
+cat <<EOF | oc -n ${namespace} apply -f -
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: ${PRJ_NAME}-docker-image
+  spec:
+    params:
+    - name: url
+      value: ${DOCKER_IMAGE}
+    type: image
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: ${PRJ_NAME}-git-source
+  spec:
+    params:
+    - name: revision
+      value: ${REPO_BRANCH}
+    - name: url
+      value: ${APP_REPO}
+    type: git
+kind: List
+EOF
+
+
+$ oc get pipelineresource -n kabanero
+NAME           AGE
+docker-image   14s
+git-source     14s
+
+$ cat pipelinerun_exec.sh
+
+#!/bin/sh
+
+namespace=kabanero
+APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
+REPO_BRANCH=master
+DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/${PRJ_NAME}/k101-nodejs-express:v0.1"
+
+
+cat <<EOF | oc -n ${namespace} apply -f -
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: nodejs-express-build-push-deploy-pipeline-run-1
+  namespace: kabanero
+spec:
+  pipelineRef:
+    name: nodejs-express-build-push-deploy-pipeline
+  resources:
+  - name: git-source
+    resourceRef:
+      name: ${PRJ_NAME}-git-source
+  - name: docker-image
+    resourceRef:
+      name: ${PRJ_NAME}-docker-image
+  serviceAccount: kabanero-operator
+  timeout: 60m
+EOF
+
+----
+
+
+
+
+Verify the log of the PipelineRun, find the Pod in `-n kabanero` representing the current PipelineRun and display the logs for one of the sub steps. Each step is own container.
+.Commands to retrieve the right pod and display logs from one internal container (representing a step)
+----
+$ oc project kabanero
+
+$ oc get pipelinerun 
+NAME                                              SUCCEEDED   REASON    STARTTIME   COMPLETIONTIME
+nodejs-express-build-push-deploy-pipeline-run-3   Unknown     Running   7m58s
+
+
+$ oc logs -f $(oc get pods -n kabanero | grep $(oc get pipelinerun -n kabanero --no-headers | awk {'print $1'}) | awk {'print $1'}) -n kabanero
+
+$ oc logs -f $(oc get pods | grep $(oc get pipelinerun --no-headers | awk {'print $1'}) | awk {'print $1'})
+
+Error from server (BadRequest): a container name must be specified for pod nodejs-express-build-push-deploy-pipeline-run-3-build-pus-5fxt5-pod-13ec4b, choose one of: [step-create-dir-docker-image-vgw6f step-git-source-demo00-git-source-vzv7z step-extract step-validate-collection-is-active step-build step-push step-deploy-image step-image-digest-exporter-trdb4] or one of the init containers: [step-credential-initializer-kcp97 create-dir-default-image-output-dgldc step-place-tools]
+
+$ oc logs -f $(oc get pods | grep $(oc get pipelinerun --no-headers | awk {'print $1'}) | awk {'print $1'}) -c step-build
+...
+
+----
+
+You can also verify the current PipelineRun in Tekton Dashboard
+
+* Open Tekton Dashboard
+* Select `PipelineRuns` and select the running item
+
+The application is also available as `Application` resource in the Cluster. Details are available within kAppNav:
+
+* Open the kAppNav Dashboard
+* Check the applications
+* Select the application and verify the corresponding Kubernetes resources like Service, Deployment etc.
+* Find the route of the application:
+** Select the application
+** Click on the `Route` item in the Component listing
+** You will be forwarded to the OpenShift detailed view
+** Click on the route URL
+** add `/echo/ping` to the URL
+
+[NOTE]
+====
+.Summary
+* Deployment into Kubernetes/OCP Cluster works, from Source code 
+* Deployment approach independent from the used technology stack of the app
+* Do not care which tools or how a build or deployment works
+====
+
+'''
+
+== step_10
+
+.Overview
 * Create GitHub Personal Access Token
 ** Enter GitHub > Profile *Settings* > *Developer Settings* > *Personal Access Tokens*. *Generate new token*
 *** Set name
@@ -504,97 +757,18 @@ Kabanero deploys in the same namespace where Kabanero CR is deployed, usually `k
 *** Create.
 *** This will trigger a WebHook creation in GitHub. (*tbd*)
 * Create the project/namespace if not done `demo-express`, before pushing the first image to the project.
-* Test Webhook Integration: manual trigger
-** Create the PipelineResources for git repo and docker image
-** Create a PipelineRun using the Pipeline `nodejs-express-build-deploy-pipeline` with the new created resources
-** Watch the pipeline and task runs: `oc get pipelinerun --all-namespaces --watch` and `oc get taskrun --all-namespaces --watch`
-** A script exists with all necessary steps: `manual-tekton-pipelinerun.sh`
 * Test Webhook Integration: automatic trigger
 ** Watch all PipelineRuns `oc get pipelinerun --all-namespaces --watch`
 ** Make a small change and push it in the Git repo
 
+'''
 
-
-
-.Verify Pipelines
-----
-$ oc get pipeline --all-namespaces
-NAMESPACE   NAME                                      AGE
-kabanero    java-microprofile-build-deploy-pipeline   1d
-kabanero    java-spring-boot2-build-deploy-pipeline   1d
-kabanero    nodejs-build-deploy-pipeline              1d
-kabanero    nodejs-express-build-deploy-pipeline      1d
-kabanero    nodejs-loopback-build-deploy-pipeline     1d
-kabanero    pipeline0                                 1d
-
-$ oc get pipeline nodejs-express-build-deploy-pipeline -n kabanero -o yaml
-
-apiVersion: tekton.dev/v1alpha1
-kind: Pipeline
-metadata:
-  annotations:
-    manifestival: new
-...
-  name: nodejs-express-build-deploy-pipeline
-  namespace: kabanero
-...
-spec:
-  resources:
-  - name: git-source
-    type: git
-  - name: docker-image
-    type: image
-  tasks:
-  - name: build-task
-    resources:
-      inputs:
-      - name: git-source
-        resource: git-source
-      outputs:
-      - name: docker-image
-        resource: docker-image
-    taskRef:
-      name: nodejs-express-build-task
-  - name: deploy-task
-    resources:
-      inputs:
-      - name: git-source
-        resource: git-source
-      - name: docker-image
-        resource: docker-image
-    runAfter:
-    - build-task
-    taskRef:
-      name: nodejs-express-deploy-task
-----
-
-.Verify Tasks
-----
-$ oc get task --all-namespaces
-NAMESPACE   NAME                            AGE
-kabanero    java-microprofile-build-task    1d
-kabanero    java-microprofile-deploy-task   1d
-kabanero    java-spring-boot2-build-task    1d
-kabanero    java-spring-boot2-deploy-task   1d
-kabanero    monitor-result-task             1d
-kabanero    nodejs-build-task               1d
-kabanero    nodejs-deploy-task              1d
-kabanero    nodejs-express-build-task       1d
-kabanero    nodejs-express-deploy-task      1d
-kabanero    nodejs-loopback-build-task      1d
-kabanero    nodejs-loopback-deploy-task     1d
-kabanero    pipeline0-task                  1d
-
-$ oc get task nodejs-express-build-task -n kabanero -o yaml
-...
-
-$ oc get task nodejs-express-deploy-task -n kabanero -o yaml
-...
-----
+The following admin tasks are only relevant if not already done. Ask the instructor if the OpenShift environment is configured or not.
+For better understanding and administrating these are however listed here:
 
 .Create the project and set permissions for image pulling
 ----
-$ oc new-project demo-express
+$ oc new-project ${PRJ_NAME}
 
 $ oc policy add-role-to-user system:image-puller system:serviceaccount:kabanero:k101-nodejs-express --namespace=demo-express
 ----
@@ -630,110 +804,15 @@ items:
 kind: List
 ----
 
+'''
+
 Create a `app-deploy.yaml` containing the target namespaces and the correct image URL (nevertheless the image URL will be replaced during pipeline deployment)
 ----
 appsody deploy --generate-only -t image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1 -n demo-express
 ----
 
-.Manual pipeline trigger (see also: ./manual-tekton-pipelinerun.sh)
-----
-
-$ cat pipelinerun_add.sh
-#!/bin/sh
-namespace=kabanero
-APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
-REPO_BRANCH=master
-DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1"
-
-cat <<EOF | oc -n ${namespace} apply -f -
-apiVersion: v1
-items:
-- apiVersion: tekton.dev/v1alpha1
-  kind: PipelineResource
-  metadata:
-    name: docker-image
-  spec:
-    params:
-    - name: url
-      value: ${DOCKER_IMAGE}
-    type: image
-- apiVersion: tekton.dev/v1alpha1
-  kind: PipelineResource
-  metadata:
-    name: git-source
-  spec:
-    params:
-    - name: revision
-      value: ${REPO_BRANCH}
-    - name: url
-      value: ${APP_REPO}
-    type: git
-kind: List
-EOF
 
 
-$ oc get pipelineresource -n kabanero
-NAME           AGE
-docker-image   14s
-git-source     14s
-
-$ cat pipelinerun_exec.sh
-
-#!/bin/sh
-
-namespace=kabanero
-APP_REPO=https://github.com/haf-tech/k101-nodejs-express.git
-REPO_BRANCH=master
-DOCKER_IMAGE="image-registry.openshift-image-registry.svc:5000/demo-express/k101-nodejs-express:v0.1"
-
-
-cat <<EOF | oc -n ${namespace} apply -f -
-apiVersion: tekton.dev/v1alpha1
-kind: PipelineRun
-metadata:
-  name: nodejs-express-build-deploy-pipeline-run-1
-  namespace: kabanero
-spec:
-  pipelineRef:
-    name: nodejs-express-build-push-deploy-pipeline
-  resources:
-  - name: git-source
-    resourceRef:
-      name: git-source
-  - name: docker-image
-    resourceRef:
-      name: docker-image
-  serviceAccount: kabanero-operator
-  timeout: 60m
-EOF
-
-----
-
-
-
-
-Verify the log of the PipelineRun, find the Pod in `-n kabanero` representing the current PipelineRun and display the logs for one of the sub steps. Each step is own container.
----
-step-create-dir-docker-image-l4z85 
-step-git-source-git-source-2trnz 
-step-assemble-extract 
-step-validate-collection-is-active 
-step-build step-push step-image-digest-exporter-4lgzc
-
-$ oc logs -f nodejs-express-build-deploy-pipeline-run-1-build-push-tas-nk4f4-pod-1d33c3 -c step-build
----
-
-
-Additionally is it necessary to add the target namespace in `app-deploy.yaml`
-*tbd*
-
-
-.Summary
-* Deployment into Kubernetes/OCP Cluster works 
-* Deployment approach independent from the used technology stack of the app
-* Do not care which tools or how a build or deployment works
-
-'''
 
 == License
 
