@@ -12,6 +12,7 @@ toc::[]
 This step-by-step instructions provides the explanation to use Kabanero (Appsody + Kabanero Collection + Kabanero Pipeline) to create a new application, build and deploy them into an OpenShift Cluster.
 
 The main structure is that every steps contains the following sections
+
 * Overview of the main steps
 * Detailed step description with the commands
 * Verification tasks if applicable
