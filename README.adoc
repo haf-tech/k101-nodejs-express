@@ -18,6 +18,8 @@ For any step exists an own git tag.
 * OCPv4 with Kabanero 0.4.0
 * Appsody 0.4.5 (0.5.3)
 
+'''
+
 === Install Appsody
 
 Use the following instruction to install Appsody
@@ -33,11 +35,12 @@ Use the following instruction to install Appsody
 ** Windows: 
 *** Download and extract: `https://github.com/appsody/appsody/releases/download/${AS_VERSION}/appsody-${AS_VERSION}-windows.tar.gz`
 *** Execute `appsody-setup.bat`
+* Verify the installation `appsody version`
 
 === Configure Appsody
 
-Appsody use different repositories to retrieve the stacks/templates.
-The course base on the Kabanero Collections. For this add the Kabanero Collection to the local Appsody repositories.
+Appsody uses different repositories to retrieve the stacks/templates.
+The course is based on the Kabanero Collections. For this add the Kabanero Collection to the local Appsody repositories.
 
 * Set env for Kabanero version: `export K_VERSION=0.4.0`
 * Add the Kabanero Collection: `appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/${K_VERSION}/kabanero-index.yaml`
@@ -54,6 +57,7 @@ Verify that the same version of the Kabanero Collection is used. Login in OpenSh
 
 analyse the value of the field `spec.collections.repositories.url` and if your target namespace is observed/listed in `spec.targetNamespaces`.
 
+NOTE: To get the OpenShift CLI Access Token. Connect to OpenShift Webconsole > Click on Username at the top right corner > Select `Copy Login Command`
 
 .Helpful links
 ----
@@ -65,6 +69,8 @@ td=$(oc get routes tekton-dashboard -n tekton-pipelines -o jsonpath='{.spec.host
 td=$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}') && echo "https://$td/kappnav-ui/"
 
 ----
+
+'''
 
 === step_00: Init
 
@@ -154,6 +160,8 @@ $ appsody stop
 * Application is runnable
 * Application/Stack is cloud-native (ready)
 * No points of contact with Docker, although it is used in the background.
+
+'''
 
 === step_01: Code changes
 
@@ -265,6 +273,8 @@ Integrate in Codewind and test and debug the flow including monitoring and perfo
 * Debugging also out of the box supported
 
 NOTE: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
+
+'''
 
 === step_03: Manual Deployment
 
@@ -409,6 +419,8 @@ k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 * Deployment handled from an `AppsodyApplication` operator and creates all resources, incl. routes
 * `Application` resource also is installed holding all meta information to the application
 * Again no Docker contact points, except the tag name.
+
+'''
 
 === step_04: Deployment with Pipeline
 
@@ -686,6 +698,8 @@ Additionally is it necessary to add the target namespace in `app-deploy.yaml`
 * Deployment into Kubernetes/OCP Cluster works 
 * Deployment approach independent from the used technology stack of the app
 * Do not care which tools or how a build or deployment works
+
+'''
 
 == License
 
