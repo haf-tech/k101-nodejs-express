@@ -442,17 +442,16 @@ Echo: mega; delay=2681
 $ echo "https://$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}')/kappnav-ui"
 https://kappnav-ui-service-kappnav.apps.bcaf.example.opentlc.com/kappnav-ui/
 
-$ oc get application
+$ oc get application -n ${PRJ_NAME}
 NAME                  AGE
 k101-nodejs-express   51m
 
-$ oc get application k101-nodejs-express -o yaml
+$ oc get application -n ${PRJ_NAME} k101-nodejs-express -o yaml
 
-$ oc describe application k101-nodejs-express
+$ oc describe application -n ${PRJ_NAME} k101-nodejs-express
 
-$ oc get pods
+$ oc get pods -n ${PRJ_NAME}
 NAME                                  READY   STATUS    RESTARTS   AGE
-appsody-operator-5b4bbc8c44-7gxt6     1/1     Running   0          52m
 k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 ----
 
