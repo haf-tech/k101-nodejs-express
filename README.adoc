@@ -16,13 +16,44 @@ For any step exists an own git tag.
 === Prerequisites
 
 * OCPv4 with Kabanero 0.4.0
+* Appsody 0.4.5 (0.5.3)
 
-.Add Kabanero repo
-----
-$ appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/0.3.1/kabanero-index.yaml
+=== Install Appsody
 
-$ appsody list kabanero
-----
+Use the following instruction to install Appsody
+
+* Set env variable with the Appsody version `export AS_VERSION=0.5.3`
+* Download and install Appsody from GitHub Release page
+** Ubuntu: 
+*** Download: `mkdir -p /tmp/appsody && cd /tmp/appsody && wget https://github.com/appsody/appsody/releases/download/${AS_VERSION}/appsody_${AS_VERSION}_amd64.deb`
+*** Install: `sudo apt install -f appsody_${AS_VERSION}_amd64.deb`
+** MacOS: 
+*** `brew install https://raw.githubusercontent.com/appsody/homebrew-appsody/test0.4.5797/appsody.rb`
+*** `brew install appsody/appsody/appsody`
+** Windows: 
+*** Download and extract: `https://github.com/appsody/appsody/releases/download/${AS_VERSION}/appsody-${AS_VERSION}-windows.tar.gz`
+*** Execute `appsody-setup.bat`
+
+=== Configure Appsody
+
+Appsody use different repositories to retrieve the stacks/templates.
+The course base on the Kabanero Collections. For this add the Kabanero Collection to the local Appsody repositories.
+
+* Set env for Kabanero version: `export K_VERSION=0.4.0`
+* Add the Kabanero Collection: `appsody repo add kabanero https://github.com/kabanero-io/collections/releases/download/${K_VERSION}/kabanero-index.yaml`
+* Verify which stacks are available from Kabanero Collection repo: `appsody list kabanero`
+* Set Kabanero Collection repo as default repo: `appsody repo set-default kabanero`
+* Verify the list of supported Appsody repos, including the default one: `appsody repo list`
+
+It is advisable to have on the local and remote env (OpenShift cluster) the same Kabanero Collection version configured.
+The Kabanero Collection is configured in the `Kabanero CustomResource` object.
+
+Verify that the same version of the Kabanero Collection is used. Login in OpenShift Cluster and check the Kabanero CR
+
+`oc get kabanero -n kabanero -o yaml`
+
+analyse the value of the field `spec.collections.repositories.url` and if your target namespace is observed/listed in `spec.targetNamespaces`.
+
 
 .Helpful links
 ----
@@ -39,6 +70,7 @@ td=$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}') && 
 
 Initial the project.
 
+.Overview
 * Intro in Appsody
 * Create the project using the `nodejs-express` stack from Kabanero Collection
 * Run the application
@@ -50,34 +82,19 @@ Initial the project.
 
 $ appsody repo list
 
-NAME      	URL
-*incubator	https://github.com/appsody/stacks/releases/latest/download/incubator-index.yaml
-appsodyex 	https://github.com/appsody/stacks/releases/latest/download/experimental-index.yaml
-kabanero  	https://github.com/kabanero-io/collections/releases/download/0.3.0/kabanero-index.yaml
+NAME     	URL
+*kabanero	https://github.com/kabanero-io/collections/releases/download/0.4.0/kabanero-index.yaml
+appsodyex	https://github.com/appsody/stacks/releases/latest/download/experimental-index.yaml
+incubator	https://github.com/appsody/stacks/releases/latest/download/incubator-index.yaml
 
 $ appsody list
 
-REPO      	ID                       	VERSION  	TEMPLATES        	DESCRIPTION
-appsodyex 	java-spring-boot2-liberty	0.1.10   	*default         	Spring Boot on Open Liberty & OpenJ9 using Maven
-appsodyex 	nodejs-functions         	0.1.5    	*simple          	Serverless runtime for Node.js functions
-appsodyex 	quarkus                  	0.2.1    	*default         	Quarkus runtime for running Java applications
-appsodyex 	rocket                   	0.1.0    	*simple          	Rocket web framework for Rust
-appsodyex 	rust                     	0.1.4    	*simple          	Runtime for Rust applications
-appsodyex 	vertx                    	0.1.4    	*default         	Eclipse Vert.x runtime for running Java applications
-*incubator	java-microprofile        	0.2.19   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
-*incubator	java-spring-boot2        	0.3.17   	*default, kotlin 	Spring Boot using OpenJ9 and Maven
-*incubator	kitura                   	0.2.2    	*default         	Runtime for Kitura applications
-*incubator	nodejs                   	0.2.5    	*simple          	Runtime for Node.js applications
-*incubator	nodejs-express           	0.2.9    	scaffold, *simple	Express web framework for Node.js
-*incubator	nodejs-loopback          	0.1.7    	*scaffold        	LoopBack 4 API Framework for Node.js
-*incubator	python-flask             	0.1.6    	*simple          	Flask web Framework for Python
-*incubator	starter                  	0.1.1    	*simple          	Runnable starter stack, copy to create a new stack
-*incubator	swift                    	0.2.3    	*simple          	Appsody runtime for Swift applications
-kabanero  	java-microprofile        	0.2.18   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
-kabanero  	java-spring-boot2        	0.3.15   	*default, kotlin 	Spring Boot using OpenJ9 and Maven
-kabanero  	nodejs                   	0.2.5    	*simple          	Runtime for Node.js applications
-kabanero  	nodejs-express           	0.2.7    	scaffold, *simple	Express web framework for Node.js
-kabanero  	nodejs-loopback          	0.1.5    	*scaffold        	LoopBack 4 API Framework for Node.js
+REPO    	ID               	VERSION  	TEMPLATES        	DESCRIPTION
+kabanero	java-microprofile	0.2.19   	*default         	Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+kabanero	java-spring-boot2	0.3.18   	*default, kotlin 	Spring Boot using OpenJ9 and Maven
+kabanero	nodejs           	0.2.6    	*simple          	Runtime for Node.js applications
+kabanero	nodejs-express   	0.2.8    	scaffold, *simple	Express web framework for Node.js
+kabanero	nodejs-loopback  	0.1.6    	*scaffold        	LoopBack 4 API Framework for Node.js
 ----
 
 Appsody Stacks, e.g. link:https://github.com/appsody/stacks/tree/master/incubator/nodejs-express[nodejs-express] compared to same stack option from Kabanero Collection: link:https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express[nodejs-express].
@@ -111,12 +128,38 @@ $ appsody run -v
 
 ...
 [Container] App started on PORT 3000
+
+
+$ docker ps | grep kabanero
+
+$ appsody stop
 ----
+
+.Test Endpoints
+* Home: link:http://localhost:3000[]
+* Health: link:http://localhost:3000/health[]
+* Liveness: link:http://localhost:3000/live[]
+* Readiness: link:http://localhost:3000/ready[]
+* Prometheus Metrics: link:http://localhost:3000/metrics[]
+* Dashboard: link:http://localhost:3000/appmetrics-dash[]
+
+
+.Verification
+* Check the content of the project and compare them with the link:https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express/templates/simple[template].
+* See that a base docker image is now available `docker images | grep nodejs-express`
+* Check the endpoints
+
+.Summary
+* New project created using Appsody stack `nodejs-express` from the Kabanero Collections
+* Application is runnable
+* Application/Stack is cloud-native (ready)
+* No points of contact with Docker, although it is used in the background.
 
 === step_01: Code changes
 
 Change the code and see immediately the modification online.
 
+.Overview
 * Start the app
 * modify the `app.js` and add a new endpoint
 * Call the new endpoint link:http://localhost:3000/echo/test-user[]
@@ -130,7 +173,7 @@ $ appsody run -v
 [Container] App started on PORT 3000
 ----
 
-.Add new endpoint with random delay in processing
+.Add new endpoint with random delay in processing, file: app.js
 [source,javascript]
 ----
 const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
@@ -144,6 +187,9 @@ app.get('/echo/:val', (req, res) => {
   })
   
 });
+
+// before
+// module.exports.app = app;
 ----
 
 Verify the terminal with the Appsody log output to see the monitored file change. Appsody restarts the node process with the latest change.
@@ -163,15 +209,21 @@ Verify also that the same docker container is still running
 
 .Check docker process
 ----
-$ docker ps | grep k101-nodejs-express
+$ docker ps | grep kabanero
 
 ab14a8692277        kabanero/nodejs-express:0.2   "/.appsody/appsody-c…"   7 minutes ago       Up 7 minutes        0.0.0.0:3000->3000/tcp, 0.0.0.0:8080->8080/tcp, 0.0.0.0:9229->9229/tcp   k101-nodejs-express-dev
 ----
 
 .Check the log from the docker process (similar to the log output from Appsody terminal)
 ----
-$ docker logs -f $(docker ps | grep k101-nodejs-express | awk '{print $1}')
+$ docker logs -f $(docker ps | grep kabanero | awk '{print $1}')
 ----
+
+.Verification
+* Docker container is still the same, also after code changes. Check CREATED / STATUS from `docker ps`
+* Execute the new endpoint link:http://localhost:3000/echo/Ich-Check-Das[]
+* ...and see the the request(s) in the Dashboard
+
 
 .Summary
 * Fast ramp-up. New nodejs-express created without taking care about project initialization, structure, dependencies
@@ -216,31 +268,44 @@ NOTE: The features like Application Monitoring and Performance test support is d
 
 === step_03: Manual Deployment
 
-Deploy the application into a OCP Cluster (current OCPv3.11) using manual steps.
+Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 
 .Prerequisites
-* OCPv3.11 cluster
+* OCPv4.2 cluster
 * `oc` cli installed on local machine
-* Kabanero (v0.2.0) Foundation installed, see link:https://kabanero.io/docs/ref/general/installing-kabanero-foundation.html[]. Consider to checkout the *0.2.0* branch!
+* Kabanero (v0.4.0) Foundation installed, see link:https://kabanero.io/docs/ref/general/installation/installing-kabanero-foundation.html[]. Consider to checkout the *0.4.0* branch!
+* Set env var for Container Registry URL: `export CR_URL=<the OpenShift URL>`
+* Set env var for own project name: `export PRJ_NAME=<your-project-name>`
+* Add the domain of the Container Registry to the docker daemon config to avoid insecure error messages
+.${HOME}/.docker/daemon.json - Example with two Container Registry domains
+[javascript]
+----
+{
+    "bip":"172.18.0.1/24",
+    "debug": true,
+    "storage-driver": "overlay",
+    "insecure-registries": [
+        "registry.test.training.katacoda.com:4567", 
+        "image-registry-openshift-image-registry.2886795280-80-shadow04.environments.katacoda.com"]
+}
+----
 
 .Steps
 * Connect to the OCP cluster
 ** Get the CLI command with token from the OCP Application console
 ** `oc login https://master.com:443 --token=....`
+* Login to Container Registry
+** If the Registry is insecure, you receive e.g. following error message `Error response from daemon: Get https://docker-registry-..example.com/v2/: x509: certificate signed by unknown authority`. 
+** Add the domain in the Docker config for insecure registries.
+** Login to OCP registry: `docker login -u $(oc whoami) -p $(oc whoami -t) http://${CR_URL}`
 * Build a stable version 
-** Login to Container Registry
-*** If the Registry is insecure, you receive e.g. following error message `Error response from daemon: Get https://docker-registry-default.apps.bcaf.example.opentlc.com/v2/: x509: certificate signed by unknown authority`. Add the domain in the Docker config for insecure registries.
-*** Login to OCP registry: `docker login -u $(oc whoami) -p $(oc whoami -t) http://docker-registry-default.apps.bcaf.example.opentlc.com`
-** Tag the version: `appsody build -t k101-nodejs-express:v0.1`
-** OPTIONAL
-*** Tag the version: `appsody build -t docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1`
-*** Generate the manifest file (optional, created with build): `appsody deploy --generate-only -t k101-nodejs-express:v0.1`
-* Push the docker image
-** `docker push docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1`
-** The internal ImageStream use then `docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1`
+
+* Tagging
+** Tag and push the version: `appsody build -t ${PRJ_NAME}/k101-nodejs-express:v0.1 --push-url ${CR_URL}`
+** Verify that an ImageStream is created
 * Deployment
-** Create the project in OCP: `oc new-project demo-express`
-** Deploy into the cluster using the internal image: `appsody deploy -t docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1 --namespace demo-express`
+** Create the project in OCP: `oc new-project ${PRJ_NAME}`, if not available
+** Deploy into the cluster using the internal image: `appsody deploy -t docker-registry.default.svc:5000/${PRJ_NAME}/k101-nodejs-express:v0.1 --namespace ${PRJ_NAME} --no-build`
 * Verification
 ** Call the endpoint of the deployed app
 ** Call kAppNav to see the deployed app
@@ -248,21 +313,20 @@ Deploy the application into a OCP Cluster (current OCPv3.11) using manual steps.
 
 .Build
 ----
-$ docker login -u $(oc whoami) -p $(oc whoami -t) https://docker-registry-default....opentlc.com
+$ docker login -u $(oc whoami) -p $(oc whoami -t) https://${CR_URL}
 Login Succeeded
 
-$ appsody build -t docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1
+$ appsody build -t ${PRJ_NAME}/k101-nodejs-express:v0.1 --push-url ${CR_URL}
 
 ...
 Built docker image k101-nodejs-express:v0.1
-Running command: docker create --name k101-nodejs-express-extract kabanero/nodejs-express:0.2
-Running command: docker cp k101-nodejs-express-extract:/config/app-deploy.yaml /Users/haddouti/codewind-workspace/k101-nodejs-express/app-deploy.yaml
-Running command: docker rm k101-nodejs-express-extract -f
-Running git command: git version
-Running git command: git status -sb
-Unable to determine origin to compute repository URL
-Running git command: git log -n 1 --pretty=format:'{"author":"%an", "authoremail":"%ae", "sha":"%H", "date":"%cd", "committer":"%cn", "committeremail":"%ce", "message":"%s"}'
-Created deployment manifest: /Users/haddouti/codewind-workspace/k101-nodejs-express/app-deploy.yaml
+[Docker] Successfully tagged image-registry-openshift-image-registry.apps.cluster-d0b4.sandbox1891.opentlc.com/demo00/k101-nodejs-express:v0.1
+Pushing image image-registry-openshift-image-registry.apps.cluster-d0b4.sandbox1891.opentlc.com/demo00/k101-nodejs-express:v0.1
+Built docker image image-registry-openshift-image-registry.apps.cluster-d0b4.sandbox1891.opentlc.com/demo00/k101-nodejs-express:v0.1
+Running command: docker create --name test3-extract docker.io/kabanero/nodejs-express:0.2
+Running command: docker cp test3-extract:/config/app-deploy.yaml /Users/haddouti/codewind-workspace/test3/app-deploy.yaml
+Running command: docker rm test3-extract -f
+Created deployment manifest: /Users/haddouti/codewind-workspace/test3/app-deploy.yaml
 
 $ cat app-deploy.yaml
 
@@ -280,25 +344,18 @@ spec:
     periodSeconds: 2
 ...
 
-
-$ docker push docker-registry-default.apps.bcaf.example.opentlc.com/demo-express/k101-nodejs-express:v0.1
-
-v0.1: digest: sha256:a299cc21e7e18eebb100556377dff7f25a5283008c34f66add89229c6a08be75 size: 3886
-
-$ oc get is -n demo-express
-
-NAME                  DOCKER REPO                                                         TAGS   UPDATED
-k101-nodejs-express   docker-registry.default.svc:5000/demo-express/k101-nodejs-express   v0.1   5 minutes ago
+$ oc get is -n ${PRJ_NAME}
+NAME                  IMAGE REPOSITORY                                                              TAGS   UPDATED
+k101-nodejs-express   image-registry.openshift-image-registry.svc:5000/demo00/k101-nodejs-express   v0.1   3 minutes ago
 ----
 
 .Deploy
 ----
-$ oc new-project demo-express
+$ oc new-project ${PRJ_NAME}
 
 Now using project "demo-express" on server "https://master.com:443".
 
-$ appsody deploy -t docker-registry.default.svc:5000/demo-express/k101-nodejs-express:v0.1 --namespace demo-express
-
+$ appsody deploy -t image-registry.openshift-image-registry.svc:5000/${PRJ_NAME}/k101-nodejs-express:v0.1 --namespace ${PRJ_NAME} --no-build
 
 Extracting project from development environment
 Pulling docker image kabanero/nodejs-express:0.2
@@ -313,11 +370,11 @@ docker.io/kabanero/nodejs-express:0.2
 Running command: kubectl get route k101-nodejs-express -o jsonpath={.status.ingress[0].host} --namespace demo-express
 Deployed project running at k101-nodejs-express-demo-express.apps.bcaf.example.opentlc.com
 
-$ oc get route -n demo-express
+$ oc get route -n ${PRJ_NAME}
 NAME                  HOST/PORT                                                        PATH   SERVICES              PORT       TERMINATION   WILDCARD
 k101-nodejs-express   k101-nodejs-express-demo-express.apps.bcaf.example.opentlc.com          k101-nodejs-express   3000-tcp                 None
 
-$ curl "http://$(oc get route k101-nodejs-express -n demo-express -o jsonpath='{.spec.host}')/echo/mega"
+$ curl "http://$(oc get route k101-nodejs-express -n ${PRJ_NAME} -o jsonpath='{.spec.host}')/echo/mega"
 
 Echo: mega; delay=2681
 ----
@@ -340,7 +397,7 @@ $ oc get application k101-nodejs-express -o yaml
 
 $ oc describe application k101-nodejs-express
 
-$ c get pods
+$ oc get pods
 NAME                                  READY   STATUS    RESTARTS   AGE
 appsody-operator-5b4bbc8c44-7gxt6     1/1     Running   0          52m
 k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
@@ -351,6 +408,7 @@ k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 * For deployment we enter the Appsody world (again), will be optimized in near future
 * Deployment handled from an `AppsodyApplication` operator and creates all resources, incl. routes
 * `Application` resource also is installed holding all meta information to the application
+* Again no Docker contact points, except the tag name.
 
 === step_04: Deployment with Pipeline
 
