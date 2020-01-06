@@ -673,6 +673,7 @@ EOF
 
 
 Verify the log of the PipelineRun, find the Pod in `-n kabanero` representing the current PipelineRun and display the logs for one of the sub steps. Each step is own container.
+
 .Commands to retrieve the right pod and display logs from one internal container (representing a step)
 ----
 $ oc project kabanero
