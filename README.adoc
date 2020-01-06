@@ -8,10 +8,16 @@ Kabanero 101 - nodejs-express example used for workshops
 toc::[]
 
 == Overview
-  
-== Steps
 
-For any step exists an own git tag.
+This step-by-step instructions provides the explanation to use Kabanero (Appsody + Kabanero Collection + Kabanero Pipeline) to create a new application, build and deploy them into an OpenShift Cluster.
+
+The main structure is that every steps contains the following sections
+* Overview of the main steps
+* Detailed step description with the commands
+* Verification tasks if applicable
+* Summary
+
+== Steps
 
 === Prerequisites
 
@@ -76,12 +82,15 @@ td=$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}') && 
 
 Initial the project.
 
+[NOTE]
+====
 .Overview
 * Intro in Appsody
 * Create the project using the `nodejs-express` stack from Kabanero Collection
 * Run the application
 * Call link:http://localhost:3000/[]
 * Stop the app/container with `STRG+C` in the terminal
+====
 
 .Appsody overview
 ----
@@ -103,7 +112,7 @@ kabanero	nodejs-express   	0.2.8    	scaffold, *simple	Express web framework for
 kabanero	nodejs-loopback  	0.1.6    	*scaffold        	LoopBack 4 API Framework for Node.js
 ----
 
-Appsody Stacks, e.g. link:https://github.com/appsody/stacks/tree/master/incubator/nodejs-express[nodejs-express] compared to same stack option from Kabanero Collection: link:https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express[nodejs-express].
+Appsody Stacks, e.g. link:https://github.com/appsody/stacks/tree/master/incubator/nodejs-express[nodejs-express] compared to same stack option from Kabanero Collection: link:https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express[nodejs-express]. The main difference is the Pipeline support.
 
 
 .Create project structure
@@ -155,11 +164,14 @@ $ appsody stop
 * See that a base docker image is now available `docker images | grep nodejs-express`
 * Check the endpoints
 
+[NOTE]
+====
 .Summary
 * New project created using Appsody stack `nodejs-express` from the Kabanero Collections
 * Application is runnable
 * Application/Stack is cloud-native (ready)
 * No points of contact with Docker, although it is used in the background.
+====
 
 '''
 
@@ -167,11 +179,14 @@ $ appsody stop
 
 Change the code and see immediately the modification online.
 
+[NOTE]
+====
 .Overview
 * Start the app
 * modify the `app.js` and add a new endpoint
 * Call the new endpoint link:http://localhost:3000/echo/test-user[]
 * Stop the app/container with `STRG+C` in the terminal
+====
 
 .Start the app
 ----
@@ -232,11 +247,15 @@ $ docker logs -f $(docker ps | grep kabanero | awk '{print $1}')
 * Execute the new endpoint link:http://localhost:3000/echo/Ich-Check-Das[]
 * ...and see the the request(s) in the Dashboard
 
-
+[NOTE]
+====
 .Summary
 * Fast ramp-up. New nodejs-express created without taking care about project initialization, structure, dependencies
 * Undisturbed development without (manual) server restarts
 * Container support out of the box, without touching Dockerfile or Docker commands
+====
+
+'''
 
 === step_02: Codewind integration
 
@@ -267,12 +286,15 @@ Integrate in Codewind and test and debug the flow including monitoring and perfo
 ** Go line by line in VSCode Debug perspective, observe and watch variables
 ** Restart in Run Mode
 
+[NOTE]
+====
 .Summary
 * Project provides out of the box multiple features like: Application Monitoring, Performance testing...all without explicitly configuration
 * IDE integration in VSCode is helpful and hides any Appsody commands
 * Debugging also out of the box supported
+====
 
-NOTE: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
+IMPORTANT: The features like Application Monitoring and Performance test support is dependent from the used Appsody stack. Currently not all stacks support this features.
 
 '''
 
@@ -284,8 +306,6 @@ Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 * OCPv4.2 cluster
 * `oc` cli installed on local machine
 * Kabanero (v0.4.0) Foundation installed, see link:https://kabanero.io/docs/ref/general/installation/installing-kabanero-foundation.html[]. Consider to checkout the *0.4.0* branch!
-* Set env var for Container Registry URL: `export CR_URL=<the OpenShift URL>`
-* Set env var for own project name: `export PRJ_NAME=<your-project-name>`
 * Add the domain of the Container Registry to the docker daemon config to avoid insecure error messages
 .${HOME}/.docker/daemon.json - Example with two Container Registry domains
 [javascript]
@@ -300,7 +320,10 @@ Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 }
 ----
 
-.Steps
+[NOTE]
+====
+.Overview
+* Set the env vars for `CR_URL` and `PRJ_NAME`
 * Connect to the OCP cluster
 ** Get the CLI command with token from the OCP Application console
 ** `oc login https://master.com:443 --token=....`
@@ -319,7 +342,15 @@ Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 * Verification
 ** Call the endpoint of the deployed app
 ** Call kAppNav to see the deployed app
+====
 
+
+.Prepare the current env context
+----
+$ export CR_URL=<the OpenShift URL>
+
+$ export PRJ_NAME=<your-project-name>
+----
 
 .Build
 ----
@@ -413,12 +444,14 @@ appsody-operator-5b4bbc8c44-7gxt6     1/1     Running   0          52m
 k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 ----
 
-
+[NOTE]
+====
 .Summary
 * For deployment we enter the Appsody world (again), will be optimized in near future
 * Deployment handled from an `AppsodyApplication` operator and creates all resources, incl. routes
 * `Application` resource also is installed holding all meta information to the application
 * Again no Docker contact points, except the tag name.
+====
 
 '''
 
