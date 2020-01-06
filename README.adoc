@@ -718,7 +718,7 @@ The application is also available as `Application` resource in the Cluster. Deta
 
 '''
 
-== step_10
+== step_10 DRAFT
 
 .Overview
 * Create GitHub Personal Access Token
