@@ -467,7 +467,7 @@ k101-nodejs-express-ffbf86dc4-gvhnn   1/1     Running   0          16m
 
 '''
 
-=== step_04: Deployment with Pipeline
+=== step_04: Manual Deployment with Pipeline
 
 Deploy manually an application into a OCP Cluster (current OCPv4.2) using Tekton Pipelines.
 
