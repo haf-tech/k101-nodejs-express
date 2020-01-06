@@ -682,10 +682,7 @@ $ oc get pipelinerun
 NAME                                              SUCCEEDED   REASON    STARTTIME   COMPLETIONTIME
 nodejs-express-build-push-deploy-pipeline-run-3   Unknown     Running   7m58s
 
-
-$ oc logs -f $(oc get pods -n kabanero | grep $(oc get pipelinerun -n kabanero --no-headers | awk {'print $1'}) | awk {'print $1'}) -n kabanero
-
-$ oc logs -f $(oc get pods | grep $(oc get pipelinerun --no-headers | awk {'print $1'}) | awk {'print $1'})
+$ oc logs -f $(oc get pods | grep $(oc get pipelinerun --no-headers | awk {'print $1'} | grep -v 'Completed') | awk {'print $1'})
 
 Error from server (BadRequest): a container name must be specified for pod nodejs-express-build-push-deploy-pipeline-run-3-build-pus-5fxt5-pod-13ec4b, choose one of: [step-create-dir-docker-image-vgw6f step-git-source-demo00-git-source-vzv7z step-extract step-validate-collection-is-active step-build step-push step-deploy-image step-image-digest-exporter-trdb4] or one of the init containers: [step-credential-initializer-kcp97 create-dir-default-image-output-dgldc step-place-tools]
 
