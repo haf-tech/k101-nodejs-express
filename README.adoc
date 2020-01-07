@@ -403,7 +403,7 @@ k101-nodejs-express   image-registry.openshift-image-registry.svc:5000/demo00/k1
 With Appsody is also possible to deploy the application into an OpenShift Cluster.
 The deploy command also (re-)build the application. New Appsody versions (> 0.5) provides the flag `--no-build` to skip the build sub-step.
 
-NOTE: The Appsody version <0.5 lacks the feature of direct pushing the image to the registry and set the correctly the image URL in the manifest file. However the Appsody version >0.5 has an other link:https://github.com/appsody/appsody/issues/827[issue] which is not usable in this walkthrough. For this, please call the `deploy` command, adjust the manifest file, and re-apply the manifest file again.
+NOTE: The Appsody version <0.5 has an issue with the direct pushing of the new generated image to the registry and sets a wrong/external image URL in the manifest file. However the Appsody version >0.5 has an other link:https://github.com/appsody/appsody/issues/827[issue] which is not usable in this walkthrough. For this, please call the `deploy` command, adjust the manifest file, and re-apply the manifest file again.
 
 .Deploy
 ----
