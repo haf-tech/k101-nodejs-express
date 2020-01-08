@@ -10,7 +10,7 @@ cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
-  name: nodejs-express-build-push-deploy-pipeline-run-3
+  name: ${PRJ_NAME}-nodejs-express-build-push-deploy-pipeline-run-3
   namespace: ${namespace}
 spec:
   pipelineRef:

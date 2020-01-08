@@ -519,7 +519,7 @@ TIP: Consider to replace the Git Repo URL in the Pipeline definition if you will
 [NOTE]
 ====
 .Overview
-* Test Webhook Integration: manual trigger
+* Test Pipeline Execution: manual trigger
 ** Create the PipelineResources for git repo and docker image
 ** Create a PipelineRun using the Pipeline `nodejs-express-build-deploy-pipeline` with the new created resources
 ** Watch the pipeline and task runs: `oc get pipelinerun --all-namespaces --watch` and `oc get taskrun --all-namespaces --watch`
@@ -678,7 +678,7 @@ cat <<EOF | oc -n ${namespace} apply -f -
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
-  name: nodejs-express-build-push-deploy-pipeline-run-1
+  name: ${PRJ_NAME}-nodejs-express-build-push-deploy-pipeline-run-1
   namespace: kabanero
 spec:
   pipelineRef:
@@ -720,12 +720,12 @@ $ oc logs -f $(oc get pods | grep $(oc get pipelinerun --no-headers | awk {'prin
 
 You can also verify the current PipelineRun in Tekton Dashboard
 
-* Open Tekton Dashboard
+* Open *Tekton* Dashboard
 * Select `PipelineRuns` and select the running item
 
 The application is also available as `Application` resource in the Cluster. Details are available within kAppNav:
 
-* Open the kAppNav Dashboard
+* Open the *kAppNav* Dashboard
 * Check the applications
 * Select the application and verify the corresponding Kubernetes resources like Service, Deployment etc.
 * Find the route of the application:
@@ -744,6 +744,83 @@ The application is also available as `Application` resource in the Cluster. Deta
 ====
 
 '''
+
+
+== step_05: Automatic Deployment with Pipeline
+
+Deploy the application into a OCP Cluster (current OCPv4.2) using GitHub Webhook.
+
+Wit the help of a GitHub Webhook new PipelineRuns are executed.
+The Webhook configuration in Tekton contains the information which Pipeline and Docker Image to be used.
+
+For simplicity the following is given:
+
+* Public repository with Kabanero application (this one here)
+* Target Namespace is `demo-express`
+* No GitHub Secret is needed
+* Kabanero is configured to support multiple target namespaces
+* A default Webhook is also configured. Skip the Webhook configuration instruction if you want to re-use it
+
+
+
+.Prerequisites
+* OCP Cluster
+* Kabanero Foundation installed, incl. Tekton
+* Public Git repo with Kabanero application
+
+TIP: Consider to replace the Git Repo URL in the Pipeline definition if you will use your own repository. Otherwise imagine you have already pushed your new application and code change to the given Git repo and you will deploy the latest version with Kabanero Pipeline.
+
+[NOTE]
+====
+.Overview
+* Test Pipeline Execution: triggered by Webhook
+** Create a GitHub PAT
+** Create in Tekton a Webhook, this will register the Webhook in the GitHub repo
+** Push a change and watch the pipeline execution
+====
+
+
+
+.Overview
+* Create GitHub Personal Access Token
+** Enter GitHub > Profile *Settings* > *Developer Settings* > *Personal Access Tokens*. *Generate new token*
+*** Set name
+*** Set permission: `admin:repo_hook`
+*** Remember the token!
+* Configure Tekton Webhook for GitHub
+** Call Tekton Dashboard `echo "http://$(oc get routes tekton-dashboard -n kabanero -o jsonpath='{.spec.host}')"`
+** Select *Webhooks*
+** Set fields:
+*** Name: demo-express-webhook
+*** Repository URL: The URL to the Git repo, e.g. https://github.com/haf-tech/k101-nodejs-express.git
+*** Access Token: Press + and define a name and the Github PAT
+*** Namespace: kabanero
+*** Pipeline: select the pipeline, here `nodejs-express-build-deploy-pipeline`
+*** Service Account: kabanero-operator
+*** Docker Registry: e.g. the internal one with the namespace, `image-registry.openshift-image-registry.svc:5000/demo-express`
+*** Create.
+*** This will trigger a WebHook creation in GitHub.
+** Verify the WebHook in GitHub
+*** Select repo in GitHub
+*** Select Settings > Webhook and the new created Webhook item
+*** Scroll to the bottom and check the result of the last Webhook Execution
+*** If error, redeliver and see if status code is `200`. The first initialization can take approx 5min.
+* Create the project/namespace if not done `demo-express`, before pushing the first image to the project.
+* Test Webhook Integration: automatic trigger
+** Watch all PipelineRuns `oc get pipelinerun --all-namespaces --watch`
+** Make a small change and push it in the Git repo
+
+
+[NOTE]
+====
+.Summary
+* Triggering a deployment from Source control is also supported
+* End-2-End process from Git commit until deployment into a cluster is covered
+====
+
+'''
+
+
 
 == step_10 DRAFT
 
