@@ -267,6 +267,13 @@ This step is optional.
 * VSCode with Codewind plugin, use the marketplace and search for `ibm.codewind` (current version in 01.2020: 0.7.0)
 ** After installation, a `CODEWIND` view will be added to the VSCode window. Right click on `Local` and select `Start Local Codewind`. This will download the relevant Docker images.
 
+.Codewind 0.7.0 workaround
+----
+
+docker tag eclipse/codewind-performance-amd64:0.7.0 codewind-performance-amd64:0.7.0
+docker tag eclipse/codewind-pfe-amd64:0.7.0 codewind-pfe-amd64:0.7.0
+----
+
 .Steps
 * Add the existing project to Codewind. In Codewind view, select *Projects* > *Add Existing Project* and select the directory of the project
 * Check Codewind features
