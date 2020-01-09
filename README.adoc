@@ -23,7 +23,7 @@ The main structure is that every steps contains the following sections
 === Prerequisites
 
 * OCPv4 with Kabanero 0.4.0
-* Appsody 0.4.5 (0.5.3)
+* Appsody 0.4.5 (0.5.4)
 
 '''
 
@@ -31,7 +31,7 @@ The main structure is that every steps contains the following sections
 
 Use the following instruction to install Appsody
 
-* Set env variable with the Appsody version `export AS_VERSION=0.5.3`
+* Set env variable with the Appsody version `export AS_VERSION=0.4.5`
 * Download and install Appsody from GitHub Release page
 ** Ubuntu: 
 *** Download: `mkdir -p /tmp/appsody && cd /tmp/appsody && wget https://github.com/appsody/appsody/releases/download/${AS_VERSION}/appsody_${AS_VERSION}_amd64.deb`
@@ -347,6 +347,7 @@ Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 ** Call kAppNav to see the deployed app
 ====
 
+TIP: Consider to change the application name in the different commands instead using of `k101-nodejs-express`.
 
 .Prepare the current env context
 ----
@@ -809,6 +810,7 @@ TIP: Consider to replace the Git Repo URL in the Pipeline definition if you will
 * Test Webhook Integration: automatic trigger
 ** Watch all PipelineRuns `oc get pipelinerun --all-namespaces --watch`
 ** Make a small change and push it in the Git repo
+*** Check always the Tekton dashboard under PipelineRun first, if the Webhook received or not, even if Github says there was an error like Timeout.
 
 
 [NOTE]
