@@ -747,7 +747,7 @@ The application is also available as `Application` resource in the Cluster. Deta
 '''
 
 
-== step_05: Automatic Deployment with Pipeline
+=== step_05: Automatic Deployment with Pipeline
 
 Deploy the application into a OCP Cluster (current OCPv4.2) using GitHub Webhook.
 
