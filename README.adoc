@@ -329,6 +329,7 @@ Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
         "image-registry-openshift-image-registry.2886795280-80-shadow04.environments.katacoda.com"]
 }
 ----
+* Restart the docker daemon
 
 [NOTE]
 ====
