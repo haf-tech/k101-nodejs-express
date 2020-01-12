@@ -83,9 +83,9 @@ td=$(oc get routes kappnav-ui-service -n kappnav -o jsonpath='{.spec.host}') && 
 
 Initial the project.
 
-[NOTE]
+.Step Overview
+[%collapsible]
 ====
-.Overview
 * Intro in Appsody
 * Create the project using the `nodejs-express` stack from Kabanero Collection
 * Run the application
@@ -180,9 +180,9 @@ $ appsody stop
 
 Change the code and see immediately the modification online.
 
-[NOTE]
+.Step Overview
+[%collapsible]
 ====
-.Overview
 * Start the app
 * modify the `app.js` and add a new endpoint
 * Call the new endpoint link:http://localhost:3000/echo/test-user[]
@@ -264,8 +264,12 @@ Integrate in Codewind and test and debug the flow including monitoring and perfo
 This step is optional. 
 
 .Prerequisites
+[%collapsible]
+====
 * VSCode with Codewind plugin, use the marketplace and search for `ibm.codewind` (current version in 01.2020: 0.7.0)
 ** After installation, a `CODEWIND` view will be added to the VSCode window. Right click on `Local` and select `Start Local Codewind`. This will download the relevant Docker images.
+====
+
 
 .Codewind 0.7.0 workaround
 ----
@@ -275,6 +279,7 @@ docker tag eclipse/codewind-pfe-amd64:0.7.0 codewind-pfe-amd64:0.7.0
 ----
 
 .Steps
+* Install Codewind plugin in VSCode - see prerequisites above.
 * Add the existing project to Codewind. In Codewind view, select *Projects* > *Add Existing Project* and select the directory of the project
 * Check Codewind features
 ** `Open App`: use the context menu in Codewind for the project, to open app in browser
@@ -313,9 +318,10 @@ IMPORTANT: The features like Application Monitoring and Performance test support
 Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 
 .Prerequisites
-* OCPv4.2 cluster
+[%collapsible]
+====
+* OCPv4.2 cluster with Kabanero (provided from Admin/Instructor)
 * `oc` cli installed on local machine
-* Kabanero (v0.4.0) Foundation installed, see link:https://kabanero.io/docs/ref/general/installation/installing-kabanero-foundation.html[]. Consider to checkout the *0.4.0* branch!
 * Add the domain of the Container Registry to the docker daemon config to avoid insecure error messages
 .${HOME}/.docker/daemon.json - Example with two Container Registry domains
 [javascript]
@@ -330,10 +336,11 @@ Deploy the application into a OCP Cluster (current OCPv4.2) using manual steps.
 }
 ----
 * Restart the docker daemon
-
-[NOTE]
 ====
-.Overview
+
+.Step Overview
+[%collapsible]
+====
 * Set the env vars for `CR_URL` and `PRJ_NAME`
 * Connect to the OCP cluster
 ** Get the CLI command with token from the OCP Application console
@@ -519,9 +526,12 @@ For simplicity the following is given:
 * Kabanero is configured to support multiple target namespaces
 
 .Prerequisites
+[%collapsible]
+====
 * OCP Cluster
 * Kabanero Foundation installed, incl. Tekton
 * Public Git repo with Kabanero application
+====
 
 TIP: Consider to replace the Git Repo URL in the Pipeline definition if you will use your own repository. Otherwise imagine you have already pushed your new application and code change to the given Git repo and you will deploy the latest version with Kabanero Pipeline.
 
@@ -771,11 +781,13 @@ For simplicity the following is given:
 * A default Webhook is also configured. Skip the Webhook configuration instruction if you want to re-use it
 
 
-
 .Prerequisites
+[%collapsible]
+====
 * OCP Cluster
 * Kabanero Foundation installed, incl. Tekton
 * Public Git repo with Kabanero application
+====
 
 TIP: Consider to replace the Git Repo URL in the Pipeline definition if you will use your own repository. Otherwise imagine you have already pushed your new application and code change to the given Git repo and you will deploy the latest version with Kabanero Pipeline.
 
