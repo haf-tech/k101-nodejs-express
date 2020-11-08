@@ -4,17 +4,26 @@ metadata:
   annotations:
     architecture: x86_64
     authoritative-source-url: registry.access.redhat.com
-    build-date: 2019-10-29T20:35:20.404230
-    commit.image.appsody.dev/author: Hafid Haddouti <Hafid.Haddouti@ibm.com>
-    commit.image.appsody.dev/committer: Hafid Haddouti <Hafid.Haddouti@ibm.com>
-    commit.image.appsody.dev/date: Sat Nov 23 21:20:15 2019 +0100
-    commit.image.appsody.dev/message: Update name of PipelineRun
+    build-date: 2020-01-30T08:16:17.662981
+    commit.image.appsody.dev/author: Hafid Haddouti <code@haddouti.com>
+    commit.image.appsody.dev/committer: Hafid Haddouti <code@haddouti.com>
+    commit.image.appsody.dev/contextDir: /Users/haddouti/repos/haf-tech/k101-nodejs-express
+    commit.image.appsody.dev/date: Wed Oct 14 13:42:05 2020 +0200
+    commit.image.appsody.dev/message: Add install Kabanero script for OCP
+    commit.stack.appsody.dev/author: kilnerm <38245247+kilnerm@users.noreply.github.com>
+    commit.stack.appsody.dev/committer: GitHub <noreply@github.com>
+    commit.stack.appsody.dev/contextDir: /incubator/nodejs-express
+    commit.stack.appsody.dev/date: Fri Apr 3 09:22:57 2020 +0100
+    commit.stack.appsody.dev/message: 'Merge pull request #316 from groeges/release-0.6'
     description: This image contains the Kabanero development stack for the Nodejs
       Express collection
     distribution-scope: public
     help: For more information visit https://github.com/sclorg/s2i-nodejs-container
-    image.opencontainers.org/created: "2019-11-24T21:40:10+01:00"
-    image.opencontainers.org/revision: 8fc99e3b68bb0c39d2860d7d97b75b641f442ed9-modified
+    image.opencontainers.org/created: "2020-11-07T17:35:04+01:00"
+    image.opencontainers.org/documentation: https://github.com/haf-tech/k101-nodejs-express
+    image.opencontainers.org/revision: ee087aba5635f09bb077e8174d22a74cb714e647-modified
+    image.opencontainers.org/source: https://github.com/haf-tech/k101-nodejs-express/tree/master
+    image.opencontainers.org/url: https://github.com/haf-tech/k101-nodejs-express
     k8s.io/description: Node.js 10 available as container is a base platform for building
       and running various Node.js 10 applications and frameworks. Node.js is a platform
       built on Chrome's JavaScript runtime for easily building fast, scalable network
@@ -26,34 +35,43 @@ metadata:
     name: kabanero/nodejs-express
     openshift.io/expose-services: 8080:http
     openshift.io/tags: builder,nodejs,nodejs10
-    redhat.com/build-host: cpt-1006.osbs.prod.upshift.rdu2.redhat.com
+    redhat.com/build-host: cpt-1008.osbs.prod.upshift.rdu2.redhat.com
     redhat.com/component: nodejs-10-container
     redhat.com/deployments-dir: /opt/app-root/src
     redhat.com/dev-mode: DEV_MODE:false
     redhat.com/dev-mode.port: DEBUG_PORT:5858
     redhat.com/license_terms: https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI
-    release: "54"
+    release: "66"
     s2i.io/scripts-url: image:///usr/libexec/s2i
     s2i.openshift.io/scripts-url: image:///usr/libexec/s2i
-    stack.appsody.dev/configured: kabanero/nodejs-express:0.2
-    stack.appsody.dev/created: 2019-11-19T17:41:27+0000
-    stack.appsody.dev/revision: 82c11bd3fda141fc56df6653a58a3567dfe87d46
-    stack.appsody.dev/tag: kabanero/nodejs-express:0.2.8
+    stack.appsody.dev/authors: Chris Bailey <cnbailey@gmail.com>, Neeraj Laad <neeraj.laad@gmail.com>
+    stack.appsody.dev/configured: docker.io/kabanero/nodejs-express:0.2
+    stack.appsody.dev/created: "2020-04-21T06:50:55Z"
+    stack.appsody.dev/description: Express web framework for Node.js
+    stack.appsody.dev/digest: sha256:2d0bb6bfbbd6d4e24803d18b85edab2ae3083ab716b9a26f833300715a8caa5c
+    stack.appsody.dev/documentation: https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express/README.md
+    stack.appsody.dev/licenses: Apache-2.0
+    stack.appsody.dev/revision: 27a3254c80e6c5367a76e6099c2e18b393d15841
+    stack.appsody.dev/source: https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express/image
+    stack.appsody.dev/tag: docker.io/kabanero/nodejs-express:0.2.10
+    stack.appsody.dev/title: Node.js Express
+    stack.appsody.dev/url: https://github.com/kabanero-io/collections/tree/master/incubator/nodejs-express
     summary: Image for Kabanero Node.js Express development
-    url: https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/nodejs-10/images/1-54
+    url: https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/nodejs-10/images/1-66
     usage: s2i build <SOURCE-REPOSITORY> ubi8/nodejs-10:latest <APP-NAME>
-    vcs-ref: 6ee7553ab2fb0dc20817416392fa6025cd1003c7
+    vcs-ref: 6bc1753cc6499a5573f9fac87a839bc3fa7798d2
     vcs-type: git
     vendor: Kabanero
-    version: 0.2.5
+    version: 0.2.10
   creationTimestamp: null
   labels:
     image.opencontainers.org/title: k101-nodejs-express
-    stack.appsody.dev/version: 0.2.8
+    stack.appsody.dev/id: nodejs-express
+    stack.appsody.dev/version: 0.2.10
   name: k101-nodejs-express
   namespace: demo-express
 spec:
-  applicationImage: demo-express2/k101-nodejs-express:v0.1
+  applicationImage: image-registry-openshift-image-registry.apps.cluster-6f68.sandbox389.opentlc.com/demo-k101/k101-nodejs-express:v0.1
   createKnativeService: false
   expose: true
   livenessProbe:
